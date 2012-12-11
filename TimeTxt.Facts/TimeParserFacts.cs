@@ -14,7 +14,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsMatched()
 			{
-				Assert.True(TimeParser.Matches("3"));
+				TimeParser.ShouldMatch("3");
 			}
 
 			//[Fact]
@@ -28,7 +28,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsNotMatched()
 			{
-				Assert.False(TimeParser.Matches("x"));
+				TimeParser.ShouldNotMatch("x");
 			}
 		}
 
@@ -37,7 +37,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsNotMatched()
 			{
-				Assert.False(TimeParser.Matches("!"));
+				TimeParser.ShouldNotMatch("!");
 			}
 		}
 
@@ -46,7 +46,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsMatched()
 			{
-				Assert.True(TimeParser.Matches("3,"));
+				TimeParser.ShouldMatch("3,");
 			}
 		}
 
@@ -55,7 +55,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsNotMatched()
 			{
-				Assert.False(TimeParser.Matches("3:2"));
+				TimeParser.ShouldNotMatch("3:2");
 			}
 		}
 
@@ -64,7 +64,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsMatched()
 			{
-				Assert.True(TimeParser.Matches("3,4"));
+				TimeParser.ShouldMatch("3,4");
 			}
 		}
 
@@ -73,7 +73,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsMatched()
 			{
-				Assert.True(TimeParser.Matches("3, 4"));
+				TimeParser.ShouldMatch("3, 4");
 			}
 		}
 
@@ -82,7 +82,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsMatched()
 			{
-				Assert.True(TimeParser.Matches("3, 4,"));
+				TimeParser.ShouldMatch("3, 4,");
 			}
 		}
 
@@ -91,7 +91,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsMatched()
 			{
-				Assert.False(TimeParser.Matches("3, 4 baz"));
+				TimeParser.ShouldNotMatch("3, 4 baz");
 			}
 		}
 
@@ -100,7 +100,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsMatched()
 			{
-				Assert.True(TimeParser.Matches("3, 4, blah blah blah"));
+				TimeParser.ShouldMatch("3, 4, blah blah blah");
 			}
 		}
 

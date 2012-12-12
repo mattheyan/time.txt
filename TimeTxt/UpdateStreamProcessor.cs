@@ -18,6 +18,10 @@ namespace TimeTxt
 
 		private bool currentLineIsEmpty;
 
+		private DateTime? currentDay;
+
+		private TimeSpan? lastStart;
+
 		private long? currentTicks;
 
 		private long? totalTicks;
@@ -102,6 +106,10 @@ namespace TimeTxt
 					WriteToStream("", stream);
 
 				WriteToStream("Day: " + span.ToString("h\\:mm"), stream);
+
+				currentDay = null;
+				currentTicks = null;
+				lastStart = null;
 			}
 		}
 
@@ -123,22 +131,44 @@ namespace TimeTxt
 			if (DateTime.TryParse(line, out date))
 			{
 				FinalizeDay(stream);
+				currentDay = date;
 				currentTicks = 0;
+				lastStart = null;
 				if (!totalTicks.HasValue)
 					totalTicks = 0;
 				WriteToStream(date.ToString(dateTimeFormat), stream);
+				WriteToStream("=====================", stream);
 				return true;
 			}
 
 			return false;
 		}
 
+		private bool ProcessDateUnderline(string line, Stream stream)
+		{
+			var trimmed = line.Trim();
+			if (trimmed.Length > 0 && trimmed.Trim(new char[] { '=' }).Length == 0)
+				return true;
+
+			return false;
+		}
+
 		private bool ProcessTime(string line, Stream stream)
 		{
-			if (TimeParser.Matches(line))
+			if (currentDay.HasValue && TimeParser.Matches(line))
 			{
-				//var match = timeRegex.Match(line);
-				//return true;
+				var parsed = TimeParser.Parse(line, currentDay.Value, lastStart ?? currentDay.Value.TimeOfDay);
+				WriteToStream(parsed.ToString(), stream);
+				lastStart = parsed.Start.Value.TimeOfDay;
+
+				if (parsed.End.HasValue)
+				{
+					var duration = parsed.End.Value - parsed.Start.Value;
+					currentTicks += duration.Ticks;
+					totalTicks += duration.Ticks;
+				}
+
+				return true;
 			}
 
 			return false;

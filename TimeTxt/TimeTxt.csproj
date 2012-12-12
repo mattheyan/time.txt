@@ -35,6 +35,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParsedEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeParser.cs" />
     <Compile Include="UpdateStreamProcessor.cs" />

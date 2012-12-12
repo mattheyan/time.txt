@@ -57,6 +57,15 @@ namespace TimeTxt.ApprovalTests
 			}
 		}
 
+		public class WhenATimeIsEnded : StreamFact
+		{
+			[Fact]
+			public void ItIsReformattedAndDurationsAreCalculated()
+			{
+				Approvals.Verify(Update("5/1\r\n3, 4:10"));
+			}
+		}
+
 		protected string Update(string timesheet)
 		{
 			using (var inputStream = new MemoryStream())

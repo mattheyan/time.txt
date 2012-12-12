@@ -63,6 +63,9 @@
   <ItemGroup>
     <Content Include="WhenADateIsStarted.ItIsReformattedFromAMinimalDate.approved.txt" />
     <Content Include="WhenADateIsStarted.ItIsReformattedFromAShortDate.approved.txt" />
+    <Content Include="WhenATimeIsEnded.ItIsReformattedAndDurationsAreCalculated.approved.txt" />
+    <Content Include="WhenATimeIsStarted.ItIsReformattedFromAMinimalTime.approved.txt" />
+    <Content Include="WhenATimeIsStarted.ItIsReformattedFromAMinimalTimeWithComma.approved.txt" />
     <Content Include="WhenTheInputIsBlank.TheOutputIsBlank.approved.txt" />
     <Content Include="WhenTheInputIsWhitespace.ItIsPreserved.approved.txt" />
   </ItemGroup>

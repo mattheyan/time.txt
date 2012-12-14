@@ -36,9 +36,33 @@ namespace TimeTxt.ApprovalTests
 			}
 
 			[Fact]
+			public void ExistingUnderlineIsIgnored()
+			{
+				Approvals.Verify(Update("5/1\r\n==============="));
+			}
+
+			[Fact]
 			public void ItIsReformattedFromAShortDate()
 			{
 				Approvals.Verify(Update("05/01/2012"));
+			}
+
+			[Fact]
+			public void ExistingDayTotalIsIgnored()
+			{
+				Approvals.Verify(Update("05/01/2012\r\n\r\nDay: 0:00"));
+			}
+
+			[Fact]
+			public void ExistingDayTotalIsIgnoredEvenIfIncorrect()
+			{
+				Approvals.Verify(Update("05/02/2012\r\n\r\nDay: 1:00"));
+			}
+
+			[Fact]
+			public void ExistingWeekTotalIsIgnored()
+			{
+				Approvals.Verify(Update("05/01/2012\r\n\r\nDay: 0:00\r\n\r\nWeek: 0:00"));
 			}
 		}
 

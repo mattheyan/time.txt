@@ -61,6 +61,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="WhenADateIsStarted.ExistingDayTotalIsIgnored.approved.txt" />
+    <Content Include="WhenADateIsStarted.ExistingUnderlineIsIgnored.approved.txt" />
+    <Content Include="WhenADateIsStarted.ExistingWeekTotalIsIgnored.approved.txt" />
     <Content Include="WhenADateIsStarted.ItIsReformattedFromAMinimalDate.approved.txt" />
     <Content Include="WhenADateIsStarted.ItIsReformattedFromAShortDate.approved.txt" />
     <Content Include="WhenATimeIsEnded.ItIsReformattedAndDurationsAreCalculated.approved.txt" />

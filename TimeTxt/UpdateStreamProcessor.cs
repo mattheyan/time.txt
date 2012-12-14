@@ -20,6 +20,10 @@ namespace TimeTxt
 
 		private DateTime? currentDay;
 
+		private int ignorableLines = 0;
+
+		private int emptyLines = 0;
+
 		private TimeSpan? lastStart;
 
 		private long? currentTicks;
@@ -32,8 +36,11 @@ namespace TimeTxt
 		{
 			lineProcessors = new List<Func<string, Stream, bool>>();
 			lineProcessors.Add(ProcessEmptyLine);
+			lineProcessors.Add(ProcessDateUnderline);
 			lineProcessors.Add(ProcessDate);
 			lineProcessors.Add(ProcessTime);
+			lineProcessors.Add(ProcessDayTotal);
+			lineProcessors.Add(ProcessWeekTotal);
 		}
 
 		public UpdateStreamProcessor(string dateTimeFormat)
@@ -53,6 +60,8 @@ namespace TimeTxt
 
 				currentLineIsEmpty = false;
 
+				var preIgnorableLines = ignorableLines;
+
 				foreach (var processor in lineProcessors)
 				{
 					if (processor(line, outputStream))
@@ -61,6 +70,14 @@ namespace TimeTxt
 						break;
 					}
 				}
+
+				if (currentLineIsEmpty)
+					emptyLines += 1;
+				else
+					emptyLines = 0;
+
+				if (ignorableLines == preIgnorableLines)
+					ignorableLines = 0;
 
 				if (!processed)
 					throw new ApplicationException("The line \"" + line + "\" could not be processed.");
@@ -110,6 +127,7 @@ namespace TimeTxt
 				currentDay = null;
 				currentTicks = null;
 				lastStart = null;
+				lastLineWasEmpty = false;
 			}
 		}
 
@@ -118,7 +136,9 @@ namespace TimeTxt
 			if (string.IsNullOrWhiteSpace(line))
 			{
 				currentLineIsEmpty = true;
-				WriteToStream(line, stream);
+				if (emptyLines == ignorableLines)
+					WriteToStream(line, stream);
+				ignorableLines++;
 				return true;
 			}
 
@@ -136,8 +156,10 @@ namespace TimeTxt
 				lastStart = null;
 				if (!totalTicks.HasValue)
 					totalTicks = 0;
-				WriteToStream(date.ToString(dateTimeFormat), stream);
-				WriteToStream("=====================", stream);
+				var dateText = date.ToString(dateTimeFormat);
+				WriteToStream(dateText, stream);
+				var equals = new string(new object[dateText.Length].Select(o => '=').ToArray());
+				WriteToStream(equals, stream);
 				return true;
 			}
 
@@ -167,6 +189,42 @@ namespace TimeTxt
 					currentTicks += duration.Ticks;
 					totalTicks += duration.Ticks;
 				}
+
+				return true;
+			}
+
+			return false;
+		}
+
+		private bool ProcessDayTotal(string line, Stream stream)
+		{
+			if (line.StartsWith("Day: "))
+			{
+				if (lastLineWasEmpty)
+				{
+					currentLineIsEmpty = true;
+					emptyLines--;
+				}
+
+				ignorableLines++;
+
+				return true;
+			}
+
+			return false;
+		}
+
+		private bool ProcessWeekTotal(string line, Stream stream)
+		{
+			if (line.StartsWith("Week: "))
+			{
+				if (lastLineWasEmpty)
+				{
+					currentLineIsEmpty = true;
+					emptyLines--;
+				}
+
+				ignorableLines++;
 
 				return true;
 			}

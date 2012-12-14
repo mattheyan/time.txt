@@ -28,6 +28,20 @@ task Build -depends BuildDebug
 
 task BuildAll -depends BuildDebug,BuildRelease
 
+# Testing tasks
+###############
+
+task ApproveOutput -depends BuildDebug {
+	Run { ..\Source\packages\xunit.runners.1.9.1\tools\xunit.console.exe ..\Source\TimeTxt.ApprovalTests\bin\Debug\TimeTxt.ApprovalTests.dll }
+}
+
+task CheckFacts -depends BuildDebug {
+	
+	Run { ..\Source\packages\xunit.runners.1.9.1\tools\xunit.console.exe ..\Source\TimeTxt.Facts\bin\Debug\TimeTxt.Facts.dll }
+}
+
+task Test -depends CheckFacts,ApproveOutput
+
 # Common helper functions
 #########################
 
@@ -56,5 +70,3 @@ function GetRegistryKeyValue ([string]$path, [string]$name)
 }
 
 $msBuildPath = (GetRegistryKeyValue hklm:\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0 "MSBuildToolsPath")
-
-#

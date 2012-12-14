@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace TimeTxt
+namespace TimeTxt.Core
 {
 	public class UpdateStreamProcessor
 	{
@@ -26,9 +26,9 @@ namespace TimeTxt
 
 		private TimeSpan? lastStart;
 
-		private long? currentTicks;
+		private List<TimeSpan> daySpans;
 
-		private long? totalTicks;
+		private List<TimeSpan> weekSpans;
 
 		private List<Func<string, Stream, bool>> lineProcessors;
 
@@ -95,14 +95,18 @@ namespace TimeTxt
 
 		private void FinalizeWeek(MemoryStream stream)
 		{
-			if (totalTicks.HasValue)
+			if (weekSpans != null)
 			{
-				var span = (new DateTime(totalTicks.Value)) - DateTime.MinValue;
-
 				if (!lastLineWasEmpty)
 					WriteToStream("", stream);
 
-				WriteToStream("Week: " + span.ToString("h\\:mm"), stream);
+				if (weekSpans.Any())
+				{
+					var totalWeekSpan = weekSpans.Aggregate((l, r) => l + r);
+					WriteToStream("Week: " + totalWeekSpan.ToString("h\\:mm"), stream);
+				}
+				else
+					WriteToStream("Week: 0:00", stream);
 			}
 		}
 
@@ -115,17 +119,21 @@ namespace TimeTxt
 
 		private void FinalizeDay(Stream stream)
 		{
-			if (currentTicks.HasValue)
+			if (daySpans != null)
 			{
-				var span = (new DateTime(currentTicks.Value)) - DateTime.MinValue;
-
 				if (!lastLineWasEmpty)
 					WriteToStream("", stream);
 
-				WriteToStream("Day: " + span.ToString("h\\:mm"), stream);
+				if (daySpans.Any())
+				{
+					var totalDaySpan = daySpans.Aggregate((l, r) => l + r);
+					WriteToStream("Day: " + totalDaySpan.ToString("h\\:mm"), stream);
+				}
+				else
+					WriteToStream("Day: 0:00", stream);
 
 				currentDay = null;
-				currentTicks = null;
+				daySpans = null;
 				lastStart = null;
 				lastLineWasEmpty = false;
 			}
@@ -152,10 +160,10 @@ namespace TimeTxt
 			{
 				FinalizeDay(stream);
 				currentDay = date;
-				currentTicks = 0;
+				daySpans = new List<TimeSpan>();
 				lastStart = null;
-				if (!totalTicks.HasValue)
-					totalTicks = 0;
+				if (weekSpans == null)
+					weekSpans = new List<TimeSpan>();
 				var dateText = date.ToString(dateTimeFormat);
 				WriteToStream(dateText, stream);
 				var equals = new string(new object[dateText.Length].Select(o => '=').ToArray());
@@ -186,8 +194,8 @@ namespace TimeTxt
 				if (parsed.End.HasValue)
 				{
 					var duration = parsed.End.Value - parsed.Start.Value;
-					currentTicks += duration.Ticks;
-					totalTicks += duration.Ticks;
+					daySpans.Add(duration);
+					weekSpans.Add(duration);
 				}
 
 				return true;

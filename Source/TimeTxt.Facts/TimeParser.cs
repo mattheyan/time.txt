@@ -11,12 +11,12 @@ namespace TimeTxt.Facts
 	{
 		public static void ShouldMatch(string input)
 		{
-			Assert.True(TimeTxt.TimeParser.Matches(input));
+			Assert.True(TimeTxt.Core.TimeParser.Matches(input));
 		}
 
 		public static void ShouldNotMatch(string input)
 		{
-			Assert.False(TimeTxt.TimeParser.Matches(input));
+			Assert.False(TimeTxt.Core.TimeParser.Matches(input));
 		}
 	}
 }

@@ -55,12 +55,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TimeTxt\TimeTxt.csproj">
-      <Project>{3ea3a6eb-4e8c-416c-84be-cd5dec5a619e}</Project>
-      <Name>TimeTxt</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="WhenADateIsStarted.ExistingDayTotalIsIgnored.approved.txt" />
     <Content Include="WhenADateIsStarted.ExistingUnderlineIsIgnored.approved.txt" />
     <Content Include="WhenADateIsStarted.ExistingWeekTotalIsIgnored.approved.txt" />
@@ -71,6 +65,12 @@
     <Content Include="WhenATimeIsStarted.ItIsReformattedFromAMinimalTimeWithComma.approved.txt" />
     <Content Include="WhenTheInputIsBlank.TheOutputIsBlank.approved.txt" />
     <Content Include="WhenTheInputIsWhitespace.ItIsPreserved.approved.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TimeTxt.Core\TimeTxt.Core.csproj">
+      <Project>{3ea3a6eb-4e8c-416c-84be-cd5dec5a619e}</Project>
+      <Name>TimeTxt.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -7,8 +7,8 @@
     <ProjectGuid>{3EA3A6EB-4E8C-416C-84BE-CD5DEC5A619E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TimeTxt</RootNamespace>
-    <AssemblyName>TimeTxt</AssemblyName>
+    <RootNamespace>TimeTxt.Core</RootNamespace>
+    <AssemblyName>TimeTxt.Core</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

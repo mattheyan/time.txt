@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace TimeTxt
+namespace TimeTxt.Core
 {
 	public static class TimeParser
 	{

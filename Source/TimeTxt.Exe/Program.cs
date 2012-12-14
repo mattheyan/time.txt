@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TimeTxt.Core;
 
 namespace TimeTxt.Exe
 {
@@ -21,6 +22,9 @@ namespace TimeTxt.Exe
 
 				Environment.Exit(args.Length >= 1 && (args[0] == "/?" || args[1] == "/?") ? 0 : -1);
 			}
+
+			if (args.Any(a => a == "/d"))
+				System.Diagnostics.Debugger.Launch();
 
 			if (args[0].Equals("update", StringComparison.CurrentCultureIgnoreCase))
 			{

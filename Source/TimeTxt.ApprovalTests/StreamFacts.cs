@@ -1,6 +1,7 @@
 ﻿using ApprovalTests;
 using ApprovalTests.Reporters;
 using System.IO;
+using TimeTxt.Core;
 using Xunit;
 
 namespace TimeTxt.ApprovalTests

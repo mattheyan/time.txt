@@ -188,7 +188,7 @@ namespace TimeTxt.Core
 			if (currentDay.HasValue && TimeParser.Matches(line))
 			{
 				var parsed = TimeParser.Parse(line, currentDay.Value, lastStart ?? currentDay.Value.TimeOfDay);
-				WriteToStream(parsed.ToString(), stream);
+				WriteToStream(parsed.ToString(true), stream);
 				lastStart = parsed.Start.Value.TimeOfDay;
 
 				if (parsed.End.HasValue)

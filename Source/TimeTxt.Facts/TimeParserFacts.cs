@@ -34,6 +34,7 @@ namespace TimeTxt.Facts
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3a, ");
+				parsed.ToString(true).ShouldEqual("3a, ");
 			}
 
 			[Fact]
@@ -46,7 +47,22 @@ namespace TimeTxt.Facts
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3p, ");
+				parsed.ToString(true).ShouldEqual("3p, ");
 			}
+
+			[Fact]
+			public void Of12IsInferredAsNoon()
+			{
+				var parsed = TimeTxt.Core.TimeParser.Parse("12", Today, Noon);
+				parsed.Start.ShouldHaveValue();
+				parsed.Start.Value.Date.ShouldEqual(Today);
+				parsed.Start.Value.TimeOfDay.ShouldEqual(12.OClockPM());
+				parsed.End.ShouldNotHaveValue();
+				parsed.Notes.ShouldBeNull();
+				parsed.ToString().ShouldEqual("12p, ");
+				parsed.ToString(true).ShouldEqual("12p, ");
+			}
+
 		}
 
 		public class AnAlphabetCharacter
@@ -85,6 +101,7 @@ namespace TimeTxt.Facts
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3a, ");
+				parsed.ToString(true).ShouldEqual("3a, ");
 			}
 
 			[Fact]
@@ -97,6 +114,7 @@ namespace TimeTxt.Facts
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3p, ");
+				parsed.ToString(true).ShouldEqual("3p, ");
 			}
 		}
 
@@ -118,6 +136,7 @@ namespace TimeTxt.Facts
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3:05a, ");
+				parsed.ToString(true).ShouldEqual("3:05a, ");
 			}
 
 			[Fact]
@@ -130,6 +149,7 @@ namespace TimeTxt.Facts
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3:10p, ");
+				parsed.ToString(true).ShouldEqual("3:10p, ");
 			}
 		}
 
@@ -162,6 +182,7 @@ namespace TimeTxt.Facts
 				parsed.End.Value.TimeOfDay.ShouldEqual(4.OClockAM());
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3a, 4a, ");
+				parsed.ToString(true).ShouldEqual("(1:00) 3a, 4a, ");
 			}
 		}
 
@@ -185,6 +206,7 @@ namespace TimeTxt.Facts
 				parsed.End.Value.TimeOfDay.ShouldEqual(4.OClockAM());
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3a, 4a, ");
+				parsed.ToString(true).ShouldEqual("(1:00) 3a, 4a, ");
 			}
 		}
 
@@ -208,6 +230,7 @@ namespace TimeTxt.Facts
 				parsed.End.Value.TimeOfDay.ShouldEqual(4.OClockAM());
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3a, 4a, ");
+				parsed.ToString(true).ShouldEqual("(1:00) 3a, 4a, ");
 			}
 		}
 
@@ -231,6 +254,7 @@ namespace TimeTxt.Facts
 				parsed.End.Value.TimeOfDay.ShouldEqual(4.OClockAM());
 				parsed.Notes.ShouldBeNull();
 				parsed.ToString().ShouldEqual("3a, 4a, ");
+				parsed.ToString(true).ShouldEqual("(1:00) 3a, 4a, ");
 			}
 		}
 
@@ -263,6 +287,7 @@ namespace TimeTxt.Facts
 				parsed.End.Value.TimeOfDay.ShouldEqual(4.OClockAM());
 				parsed.Notes.ShouldEqual("blah blah blah");
 				parsed.ToString().ShouldEqual("3a, 4a, blah blah blah");
+				parsed.ToString(true).ShouldEqual("(1:00) 3a, 4a, blah blah blah");
 			}
 		}
 	}

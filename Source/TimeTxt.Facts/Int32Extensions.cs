@@ -39,7 +39,15 @@ namespace TimeTxt.Facts
 
 		public static TimeSpan OClock(this int hour, AMPM amPm)
 		{
-			return DateTime.Today.AddHours(hour + (amPm == AMPM.AM ? 0 : 12)).TimeOfDay;
+			int hoursToAdd;
+			if (hour == 12 && amPm == AMPM.AM)
+				hoursToAdd = 0;
+			else if (hour == 12 && amPm == AMPM.PM)
+				hoursToAdd = 12;
+			else
+				hoursToAdd = hour + (amPm == AMPM.PM ? 12 : 0);
+
+			return DateTime.Today.AddHours(hoursToAdd).TimeOfDay;
 		}
 
 		public static TimeSpan Minutes(this int minutes)

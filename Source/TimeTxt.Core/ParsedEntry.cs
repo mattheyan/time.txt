@@ -14,13 +14,31 @@ namespace TimeTxt.Core
 
 		public override string ToString()
 		{
+			return ToString(false);
+		}
+
+		public string ToString(bool prependDuration)
+		{
 			StringBuilder builder = new StringBuilder();
+
+			if (prependDuration && Start.HasValue && End.HasValue)
+			{
+				var duration = End.Value - Start.Value;
+				builder.Append("(");
+				builder.Append(duration.ToString("h\\:mm"));
+				builder.Append(") ");
+			}
 
 			if (Start.HasValue)
 			{
 				bool startPm;
 
-				if (Start.Value.Hour >= 12)
+				if (Start.Value.Hour == 12)
+				{
+					startPm = true;
+					builder.Append("12");
+				}
+				else if (Start.Value.Hour > 12)
 				{
 					startPm = true;
 					builder.Append(Start.Value.Hour - 12);
@@ -47,7 +65,12 @@ namespace TimeTxt.Core
 			{
 				bool endPm;
 
-				if (End.Value.Hour >= 12)
+				if (End.Value.Hour == 12)
+				{
+					endPm = true;
+					builder.Append("12");
+				}
+				else if (End.Value.Hour > 12)
 				{
 					endPm = true;
 					builder.Append(End.Value.Hour - 12);

@@ -23,9 +23,6 @@ namespace TimeTxt.Exe
 				Environment.Exit(args.Length >= 1 && (args[0] == "/?" || args[1] == "/?") ? 0 : -1);
 			}
 
-			if (args.Any(a => a == "/d"))
-				System.Diagnostics.Debugger.Launch();
-
 			if (args[0].Equals("update", StringComparison.CurrentCultureIgnoreCase))
 			{
 				if (args.Length < 2)
@@ -34,17 +31,124 @@ namespace TimeTxt.Exe
 					Environment.Exit(args.Length >= 1 && (args[0] == "/?" || args[1] == "/?") ? 0 : -1);
 				}
 
-				var path = args[1];
+				bool launchDebugger = false;
 
-				using (var inputStream = File.OpenRead(path))
+				string backupFilePath = null;
+
+				var inputFileRaw = args[1];
+				var inputFilePath = Path.GetFullPath(inputFileRaw);
+
+				string outputFileRaw = null;
+
+				if (args.Length > 2)
 				{
-					var outputStream = new UpdateStreamProcessor().Process(inputStream);
-					using (var reader = new StreamReader(outputStream))
+					foreach (string arg in args.Skip(2))
 					{
-						string line;
-						while ((line = reader.ReadLine()) != null)
+						if (!arg.StartsWith("/"))
+							throw new ArgumentException("Invalid option \"" + arg + "\".");
+
+						string argKey;
+						string argValue;
+						var argKeyAndValue = arg.Trim('/');
+
+						var argSplitIndex = argKeyAndValue.IndexOf(":");
+						if (argSplitIndex > 0)
 						{
-							Console.WriteLine(line);
+							argKey = argKeyAndValue.Substring(0, argSplitIndex);
+							argValue = argKeyAndValue.Substring(argSplitIndex + 1);
+						}
+						else
+						{
+							argKey = argKeyAndValue;
+							argValue = null;
+						}
+
+						if (argKey == "out")
+							outputFileRaw = argValue;
+						else if (argKey == "backup")
+						{
+							if (!string.IsNullOrEmpty(argValue))
+							{
+								backupFilePath = Path.GetFullPath(argValue);
+
+								// If backup path is a directory, generate a file with timestamp in that directory.
+								if (Directory.Exists(backupFilePath))
+									backupFilePath = Path.Combine(argValue, Path.GetFileName(inputFilePath) + DateTime.Now.ToString("yyyyMMdd_hhmmss") + ".backup.txt");
+							}
+							else
+							{
+								// If no value is specified, generate a file with timestamp in the same directory as the input file.
+								backupFilePath = inputFilePath + DateTime.Now.ToString("yyyyMMdd_hhmmss") + ".backup.txt";
+							}
+						}
+						else if (argKey == "launch")
+							launchDebugger = true;
+						else
+							throw new ArgumentException("Unknown option \"" + argKey + "\".");
+					}
+				}
+
+				if (launchDebugger)
+					System.Diagnostics.Debugger.Launch();
+
+				if (!string.IsNullOrEmpty(backupFilePath))
+					File.Copy(inputFilePath, backupFilePath);
+
+				if (!string.IsNullOrEmpty(outputFileRaw))
+				{
+					var outputFilePath = Path.GetFullPath(outputFileRaw);
+
+					// If the input and output file are the same, read and write separately.
+					if (outputFilePath == inputFilePath)
+					{
+						Stream buffer = null;
+
+						try
+						{
+							buffer = new MemoryStream();
+
+							using (var fileInputStream = File.OpenRead(inputFilePath))
+							{
+								new UpdateStreamProcessor().Update(fileInputStream, buffer);
+							}
+
+							buffer.Seek(0, SeekOrigin.Begin);
+
+							using (var fileWriter = new StreamWriter(File.OpenWrite(outputFilePath)))
+							{
+								using (var bufferReader = new StreamReader(buffer))
+								{
+									string line;
+									while ((line = bufferReader.ReadLine()) != null)
+										fileWriter.WriteLine(line);
+								}
+							}
+						}
+						finally
+						{
+							buffer.Dispose();
+						}
+					}
+					// Files are different, so they can be read from and written to at the same time
+					else
+					{
+						using (var fileInputStream = File.OpenRead(inputFilePath))
+						{
+							using (var fileOutputStream = File.OpenWrite(outputFilePath))
+							{
+								new UpdateStreamProcessor().Update(fileInputStream, fileOutputStream);
+							}
+						}
+					}
+				}
+				// No output file was speicifed, so write the output to standard out.
+				else
+				{
+					using (var fileInputStream = File.OpenRead(inputFilePath))
+					{
+						using (var standardOutputStream = Console.OpenStandardOutput())
+						{
+							new UpdateStreamProcessor().Update(fileInputStream, standardOutputStream);
 						}
 					}
 				}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,15 +10,29 @@ namespace TimeTxt.Core
 {
 	public static class TimeParser
 	{
-		//private static readonly Regex timeRegex = new Regex(@"^(\*?\(\d{1,2}\:\d{2}\)\s*)?(\d{1,2}(\:\d{2})?,\s*\d{1,2}(\:\d{2})?,\s*.*)", RegexOptions.Compiled);
-		private static readonly Regex timeRegex = new Regex(@"^(?:\*?\(\d{1,2}\:\d{2}\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?)(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?)(?:,(?<notes>.*))?)?)?)\s*$", RegexOptions.Compiled);
+		private static readonly Regex timeRegex = new Regex(@"^(?:\*?\(\d{1,2}\:\d{2}\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:,(?<notes>.*))?)?)|(?:,(?<notes>.*)))?)\s*$", RegexOptions.Compiled);
+
+		private static readonly string[] allowedTimeFormats = GetAllowedTimeFormats().ToArray();
+
+		private static IEnumerable<string> GetAllowedTimeFormats()
+		{
+			foreach (string hourFormat in new string[] { "h", "hh" })
+				foreach (string minuteFormat in new string[] { ":mm", "" })
+					foreach (string ampmFormat in new string[] { "t", "tt", "" })
+						yield return "yyyy/MM/dd " + hourFormat + minuteFormat + ampmFormat;
+		}
+
+		public static bool IsTimeFormatAllowed(string format)
+		{
+			return allowedTimeFormats.Contains(format);
+		}
 
 		public static bool Matches(string input)
 		{
 			return timeRegex.IsMatch(input);
 		}
 
-		public static ParsedEntry Parse(string input, DateTime day, TimeSpan lastStart)
+		public static ParsedEntry Parse(string input, DateTime day, TimeSpan timeFloor)
 		{
 			var match = timeRegex.Match(input);
 
@@ -28,56 +43,45 @@ namespace TimeTxt.Core
 
 			var startText = match.Groups["start"].Value;
 
-			int num;
-			if (int.TryParse(startText, out num))
+			DateTime start;
+			if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + startText.ToUpper(), allowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out start))
 			{
-				if (lastStart.Hours <= num)
-					result.Start = day.AddHours(num);
-				else if (lastStart.Hours <= num + 12)
-					result.Start = day.AddHours(num + 12);
+				if (start.TimeOfDay.Ticks >= timeFloor.Ticks)
+					result.Start = start;
 				else
-					throw new InvalidOperationException();
+				{
+					var startPlus12Hours = start.AddHours(12);
+
+					if (startPlus12Hours.Date == day.Date && startPlus12Hours.Ticks >= timeFloor.Ticks)
+						result.Start = startPlus12Hours;
+					else
+						throw new InvalidOperationException();
+				}
 			}
 			else
-			{
-				TimeSpan timeSpan;
-				if (TimeSpan.TryParse(startText, out timeSpan))
-				{
-					if (lastStart.Hours <= timeSpan.Hours)
-						result.Start = day.Add(timeSpan);
-					else if (lastStart.Hours <= timeSpan.Hours + 12)
-						result.Start = day.Add(timeSpan.Add(day.AddHours(12).TimeOfDay));
-				}
-				else
-					throw new NotImplementedException();
-			}
+				throw new InvalidOperationException();
 
 			var endText = match.Groups["end"].Value;
 
 			if (!string.IsNullOrWhiteSpace(endText))
 			{
-				if (int.TryParse(endText, out num))
+				DateTime end;
+				if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + endText.ToUpper(), allowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out end))
 				{
-					if (lastStart.Hours <= num)
-						result.End = day.AddHours(num);
-					else if (lastStart.Hours <= num + 12)
-						result.End = day.AddHours(num + 12);
+					if (end.TimeOfDay.Ticks > result.Start.Value.TimeOfDay.Ticks)
+						result.End = end;
 					else
-						throw new InvalidOperationException();
+					{
+						var endPlus12Hours = end.AddHours(12);
+
+						if (endPlus12Hours.Date == day.Date && endPlus12Hours.Ticks > result.Start.Value.TimeOfDay.Ticks)
+							result.End = endPlus12Hours;
+						else
+							throw new InvalidOperationException();
+					}
 				}
 				else
-				{
-					TimeSpan timeSpan;
-					if (TimeSpan.TryParse(endText, out timeSpan))
-					{
-						if (lastStart.Hours <= timeSpan.Hours)
-							result.End = day.Add(timeSpan);
-						else if (lastStart.Hours <= timeSpan.Hours + 12)
-							result.End = day.Add(timeSpan.Add(day.AddHours(12).TimeOfDay));
-					}
-					else
-						throw new NotImplementedException();
-				}
+					throw new NotImplementedException();
 			}
 
 			var notes = match.Groups["notes"].Value;

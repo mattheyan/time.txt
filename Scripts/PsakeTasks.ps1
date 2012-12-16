@@ -44,7 +44,7 @@ task Test -depends CheckFacts,ApproveOutput
 # Deploy tasks
 ##############
 
-task Deploy -depends Build,Test {
+task Deploy -depends BuildAll,Test {
 	$x86Dir = "C:\Program Files (x86)"
 	if (Test-Path $x86Dir) {
 		$deployPath = $x86Dir + "\Time.txt"
@@ -67,7 +67,7 @@ task Deploy -depends Build,Test {
 	}
 
 	write-host "Copying new files..."
-	Get-ChildItem -Path ..\Source\TimeTxt.Exe\bin\Debug -Exclude *.vshost* | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
+	Get-ChildItem -Path ..\Source\TimeTxt.Exe\bin\Release -Exclude *.vshost*,*.pdb | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
 
 	write-host "Done!"
 }

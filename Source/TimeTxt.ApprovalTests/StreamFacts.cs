@@ -248,6 +248,20 @@ Week: 1:00
 			}
 		}
 
+		public class WhenTheLineStartsWithTheCommentCharacter : StreamFact
+		{
+			[Fact]
+			public void ItIsIgnored()
+			{
+				Approvals.Verify(Update(
+	@"5/1
+#8, 9, ...
+9,10, do stuff
+"
+				));
+			}
+		}
+
 		protected string Update(string timesheet)
 		{
 			using (var inputStream = new MemoryStream())

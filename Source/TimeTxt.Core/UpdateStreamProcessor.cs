@@ -71,6 +71,7 @@ namespace TimeTxt.Core
 		private void InitLineProcessors()
 		{
 			this.lineProcessors = new List<Func<string, StreamWriter, bool>>();
+			this.lineProcessors.Add(ProcessComment);
 			this.lineProcessors.Add(ProcessEmptyLine);
 			this.lineProcessors.Add(ProcessDateUnderline);
 			this.lineProcessors.Add(ProcessDate);
@@ -237,6 +238,17 @@ namespace TimeTxt.Core
 				daySpans = null;
 				lastStart = null;
 				lastLineWasEmpty = false;
+				return true;
+			}
+
+			return false;
+		}
+
+		private bool ProcessComment(string line, StreamWriter writer)
+		{
+			if (line.StartsWith("#"))
+			{
+				WriteToStream(line, writer);
 				return true;
 			}
 

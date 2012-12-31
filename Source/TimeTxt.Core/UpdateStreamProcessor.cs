@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace TimeTxt.Core
 {
 	public class UpdateStreamProcessor
 	{
-		const string defaultDateTimeFormat = "dddd, MMMM dd, yyyy";
+		private const string DefaultDateTimeFormat = "dddd, MMMM dd, yyyy";
+
+		private static readonly string[] DefaultMonthDayFormats = new[] { "M/d", "MM/dd", "M/dd", "MM/d" };
 
 		private string dateTimeFormat;
 
@@ -23,13 +22,13 @@ namespace TimeTxt.Core
 
 		private DateTime? currentDay;
 
-		private int ignorableLines = 0;
+		private int ignorableLines;
 
-		private int emptyLines = 0;
+		private int emptyLines;
 
 		private TimeSpan? lastStart;
 
-		private bool dayInEffect = false;
+		private bool dayInEffect;
 
 		private List<TimeSpan> daySpans;
 
@@ -38,14 +37,13 @@ namespace TimeTxt.Core
 		private List<Func<string, StreamWriter, bool>> lineProcessors;
 
 		private List<string> acceptableDateFormatsList;
-		private string[] acceptableDateFormats;
 
-		private static readonly string[] defaultMonthDayFormats = new string[] { "M/d", "MM/dd", "M/dd", "MM/d" };
+		private string[] acceptableDateFormats;
 
 		public UpdateStreamProcessor()
 		{
 			InitLineProcessors();
-			InitDateFormats(defaultDateTimeFormat);
+			InitDateFormats(DefaultDateTimeFormat);
 		}
 
 		public UpdateStreamProcessor(string dateTimeFormat)
@@ -57,7 +55,7 @@ namespace TimeTxt.Core
 		public UpdateStreamProcessor(int earliestStart)
 		{
 			InitLineProcessors();
-			InitDateFormats(defaultDateTimeFormat);
+			InitDateFormats(DefaultDateTimeFormat);
 			InitEarliestStart(earliestStart);
 		}
 
@@ -70,33 +68,35 @@ namespace TimeTxt.Core
 
 		private void InitLineProcessors()
 		{
-			this.lineProcessors = new List<Func<string, StreamWriter, bool>>();
-			this.lineProcessors.Add(ProcessComment);
-			this.lineProcessors.Add(ProcessEmptyLine);
-			this.lineProcessors.Add(ProcessDateUnderline);
-			this.lineProcessors.Add(ProcessDate);
-			this.lineProcessors.Add(ProcessTime);
-			this.lineProcessors.Add(ProcessDayTotal);
-			this.lineProcessors.Add(ProcessWeekTotal);
+			lineProcessors = new List<Func<string, StreamWriter, bool>>
+				{
+					ProcessComment,
+					ProcessEmptyLine,
+					ProcessDateUnderline,
+					ProcessDate,
+					ProcessTime,
+					ProcessDayTotal,
+					ProcessWeekTotal
+				};
 		}
 
-		private void InitDateFormats(string dateTimeFormat)
+		private void InitDateFormats(string format)
 		{
-			this.dateTimeFormat = dateTimeFormat;
+			dateTimeFormat = format;
 
-			this.acceptableDateFormatsList = new List<string>();
-			this.acceptableDateFormatsList.AddRange(defaultMonthDayFormats);
-			this.acceptableDateFormatsList.AddRange(defaultMonthDayFormats.Select(f => f + "/yy"));
-			this.acceptableDateFormatsList.AddRange(defaultMonthDayFormats.Select(f => f + "/yyyy"));
-			this.acceptableDateFormatsList.Add(dateTimeFormat);
+			acceptableDateFormatsList = new List<string>();
+			acceptableDateFormatsList.AddRange(DefaultMonthDayFormats);
+			acceptableDateFormatsList.AddRange(DefaultMonthDayFormats.Select(f => f + "/yy"));
+			acceptableDateFormatsList.AddRange(DefaultMonthDayFormats.Select(f => f + "/yyyy"));
+			acceptableDateFormatsList.Add(format);
 		}
 
-		private void InitEarliestStart(int earliestStart)
+		private void InitEarliestStart(int hour)
 		{
-			if (earliestStart < 0 || earliestStart >= 12)
+			if (hour < 0 || hour >= 12)
 				throw new ArgumentOutOfRangeException();
 
-			this.earliestStart = earliestStart;
+			earliestStart = hour;
 		}
 
 		public void Update(Stream inputStream, Stream outputStream)
@@ -114,20 +114,11 @@ namespace TimeTxt.Core
 			{
 				//WriteDebug(line);
 
-				bool processed = false;
-
 				currentLineIsEmpty = false;
 
 				var preIgnorableLines = ignorableLines;
 
-				foreach (var processor in lineProcessors)
-				{
-					if (processor(line, writer))
-					{
-						processed = true;
-						break;
-					}
-				}
+				bool processed = lineProcessors.Any(p => p(line, writer));
 
 				if (currentLineIsEmpty)
 					emptyLines += 1;
@@ -146,7 +137,7 @@ namespace TimeTxt.Core
 				if (currentLineIsEmpty)
 					//WriteDebug("\tLine was considered empty.");
 
-				lastLineWasEmpty = currentLineIsEmpty;
+					lastLineWasEmpty = currentLineIsEmpty;
 			}
 
 			FinalizeDay(writer);
@@ -307,7 +298,7 @@ namespace TimeTxt.Core
 			if (dayInEffect)
 			{
 				var trimmed = line.Trim();
-				if (trimmed.Length > 0 && trimmed.Trim(new char[] { '=' }).Length == 0)
+				if (trimmed.Length > 0 && trimmed.Trim(new[] { '=' }).Length == 0)
 				{
 					//WriteDebug("\tIgnoring existing date underline.");
 					return true;

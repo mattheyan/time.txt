@@ -78,6 +78,7 @@
     <Content Include="WhenTheInputIsBlank.TheOutputIsBlank.approved.txt" />
     <Content Include="WhenTheInputIsWhitespace.ItIsPreserved.approved.txt" />
     <Content Include="WhenTheLineStartsWithTheCommentCharacter.ItIsIgnored.approved.txt" />
+    <Content Include="WhenTheTotalIsOverOneHalfHour.ItIsProperlyFormatted.approved.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TimeTxt.Core\TimeTxt.Core.csproj">

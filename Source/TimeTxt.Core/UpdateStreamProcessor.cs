@@ -185,7 +185,7 @@ namespace TimeTxt.Core
 				if (weekSpans.Any())
 				{
 					var totalWeekSpan = weekSpans.Aggregate((l, r) => l + r);
-					var sum = totalWeekSpan.TotalHours.ToString("0") + ":" + totalWeekSpan.Minutes.ToString("00");
+					var sum = Math.Floor(totalWeekSpan.TotalHours).ToString("0") + ":" + totalWeekSpan.Minutes.ToString("00");
 
 					//WriteDebug("\tWriting week value: " + sum + ".");
 					WriteToStream("Week: " + sum, writer);

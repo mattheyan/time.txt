@@ -262,6 +262,19 @@ Week: 1:00
 			}
 		}
 
+		public class WhenTheTotalIsOverOneHalfHour : StreamFact
+		{
+			[Fact]
+			public void ItIsProperlyFormatted()
+			{
+				Approvals.Verify(Update(
+	@"5/1
+8:10, 9:42, do stuff
+"
+				));
+			}
+		}
+
 		protected string Update(string timesheet)
 		{
 			using (var inputStream = new MemoryStream())

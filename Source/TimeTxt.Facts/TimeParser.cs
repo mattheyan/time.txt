@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace TimeTxt.Facts
 {
@@ -11,12 +6,12 @@ namespace TimeTxt.Facts
 	{
 		public static void ShouldMatch(string input)
 		{
-			Assert.True(TimeTxt.Core.TimeParser.Matches(input));
+			Assert.True(Core.TimeParser.Matches(input));
 		}
 
 		public static void ShouldNotMatch(string input)
 		{
-			Assert.False(TimeTxt.Core.TimeParser.Matches(input));
+			Assert.False(Core.TimeParser.Matches(input));
 		}
 	}
 }

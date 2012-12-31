@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Should;
 using Xunit;
 
@@ -27,7 +23,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();
@@ -39,7 +35,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartTimeInTheAfternoon()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3", Today, Noon);
+				var parsed = Core.TimeParser.Parse("3", Today, Noon);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockPM());
 				parsed.End.ShouldNotHaveValue();
@@ -51,7 +47,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void Of12IsInferredAsNoon()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("12", Today, Noon);
+				var parsed = Core.TimeParser.Parse("12", Today, Noon);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(12.OClockPM());
 				parsed.End.ShouldNotHaveValue();
@@ -73,7 +69,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleStartTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3a", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3a", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();
@@ -112,7 +108,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3,", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3,", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();
@@ -124,7 +120,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartTimeInTheAfternoon()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3,", Today, Noon);
+				var parsed = Core.TimeParser.Parse("3,", Today, Noon);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockPM());
 				parsed.End.ShouldNotHaveValue();
@@ -145,7 +141,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsAStartTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3:05", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3:05", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM().Add(5.Minutes()));
 				parsed.End.ShouldNotHaveValue();
@@ -157,7 +153,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsAStartTimeInTheAfternoon()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3:10", Today, Noon);
+				var parsed = Core.TimeParser.Parse("3:10", Today, Noon);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockPM().Add(10.Minutes()));
 				parsed.End.ShouldNotHaveValue();
@@ -187,7 +183,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartAndEndTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3,4", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3,4", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldHaveValue();
@@ -201,7 +197,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void SpansAcrossNoonIfEndIsGreaterThanEqualStart()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3,3", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3,3", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldHaveValue();
@@ -224,7 +220,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartAndEndTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3, 4", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3, 4", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldHaveValue();
@@ -247,7 +243,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartAndEndTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3, 4,", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3, 4,", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldHaveValue();
@@ -270,7 +266,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartAndEndTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3, 4,  ", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3, 4,  ", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldHaveValue();
@@ -294,7 +290,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartAndEndTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3, 4, blah, blah, blah", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3, 4, blah, blah, blah", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldHaveValue();
@@ -317,7 +313,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartAndEndTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("(2:24) 1:37, 4:01, computer setup, perf analysis, discuss various bugs", Today, Noon);
+				var parsed = Core.TimeParser.Parse("(2:24) 1:37, 4:01, computer setup, perf analysis, discuss various bugs", Today, Noon);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(1.OClockPM().Add(37.Minutes()));
 				parsed.End.ShouldHaveValue();
@@ -340,7 +336,7 @@ namespace TimeTxt.Facts
 			[Fact]
 			public void IsASimpleInferredStartAndEndTime()
 			{
-				var parsed = TimeTxt.Core.TimeParser.Parse("3, blah, blah, blah", Today, Midnight);
+				var parsed = Core.TimeParser.Parse("3, blah, blah, blah", Today, Midnight);
 				parsed.Start.Date.ShouldEqual(Today);
 				parsed.Start.TimeOfDay.ShouldEqual(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();

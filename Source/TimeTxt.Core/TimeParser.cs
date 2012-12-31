@@ -2,39 +2,37 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace TimeTxt.Core
 {
 	public static class TimeParser
 	{
-		private static readonly Regex timeRegex = new Regex(@"^(?:\*?\(\d{1,2}\:\d{2}\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:,(?<notes>.*))?)?)|(?:,(?<notes>.*)))?)\s*$", RegexOptions.Compiled);
+		private static readonly Regex TimeRegex = new Regex(@"^(?:\*?\(\d{1,2}\:\d{2}\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:,(?<notes>.*))?)?)|(?:,(?<notes>.*)))?)\s*$", RegexOptions.Compiled);
 
-		private static readonly string[] allowedTimeFormats = GetAllowedTimeFormats().ToArray();
+		private static readonly string[] AllowedTimeFormats = GetAllowedTimeFormats().ToArray();
 
 		private static IEnumerable<string> GetAllowedTimeFormats()
 		{
-			foreach (string hourFormat in new string[] { "h", "hh" })
-				foreach (string minuteFormat in new string[] { ":mm", "" })
-					foreach (string ampmFormat in new string[] { "t", "tt", "" })
+			foreach (var hourFormat in new[] { "h", "hh" })
+				foreach (var minuteFormat in new[] { ":mm", "" })
+					foreach (var ampmFormat in new[] { "t", "tt", "" })
 						yield return "yyyy/MM/dd " + hourFormat + minuteFormat + ampmFormat;
 		}
 
 		public static bool IsTimeFormatAllowed(string format)
 		{
-			return allowedTimeFormats.Contains(format);
+			return AllowedTimeFormats.Contains(format);
 		}
 
 		public static bool Matches(string input)
 		{
-			return timeRegex.IsMatch(input);
+			return TimeRegex.IsMatch(input);
 		}
 
 		public static ParsedEntry Parse(string input, DateTime day, TimeSpan timeFloor)
 		{
-			var match = timeRegex.Match(input);
+			var match = TimeRegex.Match(input);
 
 			if (!match.Success)
 				return null;
@@ -44,7 +42,7 @@ namespace TimeTxt.Core
 			var startText = match.Groups["start"].Value;
 
 			DateTime start;
-			if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + startText.ToUpper(), allowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out start))
+			if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + startText.ToUpper(), AllowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out start))
 			{
 				if (start.TimeOfDay.Ticks >= timeFloor.Ticks)
 					result.Start = start;
@@ -66,7 +64,7 @@ namespace TimeTxt.Core
 			if (!string.IsNullOrWhiteSpace(endText))
 			{
 				DateTime end;
-				if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + endText.ToUpper(), allowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out end))
+				if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + endText.ToUpper(), AllowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out end))
 				{
 					if (end.TimeOfDay.Ticks > result.Start.TimeOfDay.Ticks)
 						result.End = end;

@@ -16,15 +16,7 @@ namespace TimeTxt.Core
 
 		private int? earliestStart;
 
-		//private bool lastLineWasEmpty;
-
-		//private bool currentLineIsEmpty;
-
 		private DateTime? currentDay;
-
-		//private int ignorableLines;
-
-		//private int emptyLines;
 
 		private TimeSpan? lastStart;
 
@@ -158,24 +150,24 @@ namespace TimeTxt.Core
 		{
 			//WriteDebug("\tFinalizing week...");
 
-			if (weekSpans != null)
+			if (weekSpans == null)
+				return;
+
+			//WriteDebug("\tWriting empty line before week total.");
+			WriteToStream("", writer);
+
+			if (weekSpans.Any())
 			{
-				//WriteDebug("\tWriting empty line before week total.");
-				WriteToStream("", writer);
+				var totalWeekSpan = weekSpans.Aggregate((l, r) => l + r);
+				var sum = Math.Floor(totalWeekSpan.TotalHours).ToString("0") + ":" + totalWeekSpan.Minutes.ToString("00");
 
-				if (weekSpans.Any())
-				{
-					var totalWeekSpan = weekSpans.Aggregate((l, r) => l + r);
-					var sum = Math.Floor(totalWeekSpan.TotalHours).ToString("0") + ":" + totalWeekSpan.Minutes.ToString("00");
-
-					//WriteDebug("\tWriting week value: " + sum + ".");
-					WriteToStream("Week: " + sum, writer);
-				}
-				else
-				{
-					//WriteDebug("\tNo time to write for the week.");
-					WriteToStream("Week: 0:00", writer);
-				}
+				//WriteDebug("\tWriting week value: " + sum + ".");
+				WriteToStream("Week: " + sum, writer);
+			}
+			else
+			{
+				//WriteDebug("\tNo time to write for the week.");
+				WriteToStream("Week: 0:00", writer);
 			}
 		}
 
@@ -183,85 +175,81 @@ namespace TimeTxt.Core
 		{
 			//WriteDebug("\tFinalizing day...");
 
-			if (daySpans != null)
+			if (daySpans == null)
+				return false;
+
+			//WriteDebug("\tWriting empty line before day total.");
+			WriteToStream("", writer);
+
+			if (daySpans.Any())
 			{
-				//WriteDebug("\tWriting empty line before day total.");
-				WriteToStream("", writer);
+				var totalDaySpan = daySpans.Aggregate((l, r) => l + r);
+				var sum = totalDaySpan.ToString("h\\:mm");
 
-				if (daySpans.Any())
-				{
-					var totalDaySpan = daySpans.Aggregate((l, r) => l + r);
-					var sum = totalDaySpan.ToString("h\\:mm");
-
-					//WriteDebug("\tWriting day value: " + sum + ".");
-					WriteToStream("Day: " + sum, writer);
-				}
-				else
-				{
-					//WriteDebug("\tNo time to write for the day.");
-					WriteToStream("Day: 0:00", writer);
-				}
-
-				dayInEffect = false;
-				currentDay = null;
-				daySpans = null;
-				lastStart = null;
-				return true;
+				//WriteDebug("\tWriting day value: " + sum + ".");
+				WriteToStream("Day: " + sum, writer);
+			}
+			else
+			{
+				//WriteDebug("\tNo time to write for the day.");
+				WriteToStream("Day: 0:00", writer);
 			}
 
-			return false;
+			dayInEffect = false;
+			currentDay = null;
+			daySpans = null;
+			lastStart = null;
+			return true;
 		}
 
 		private bool ProcessComment(string line, StreamWriter writer)
 		{
-			if (line.StartsWith("#"))
-			{
-				WriteToStream(line, writer);
-				return true;
-			}
+			if (!line.StartsWith("#"))
+				return false;
 
-			return false;
+			WriteToStream(line, writer);
+			return true;
 		}
 
 		private bool ProcessDate(string line, StreamWriter writer)
 		{
 			DateTime date;
-			if (DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out date))
+
+			if (!DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out date))
+				return false;
+
+			//WriteDebug("\t" + line + " parsed as date " + date.ToString());
+
+			if (FinalizeDay(writer))
 			{
-				//WriteDebug("\t" + line + " parsed as date " + date.ToString());
-
-				if (FinalizeDay(writer))
-				{
-					//WriteDebug("\tPrevious day was ended, so writing empty line.");
-					WriteToStream("", writer);
-				}
-
-				dayInEffect = true;
-				currentDay = date;
-				daySpans = new List<TimeSpan>();
-				lastStart = null;
-				if (weekSpans == null)
-					weekSpans = new List<TimeSpan>();
-				var dateText = date.ToString(dateTimeFormat);
-				WriteToStream(dateText, writer);
-				var equals = new string(new object[dateText.Length].Select(o => '=').ToArray());
-				WriteToStream(equals, writer);
-				return true;
+				//WriteDebug("\tPrevious day was ended, so writing empty line.");
+				WriteToStream("", writer);
 			}
 
-			return false;
+			dayInEffect = true;
+			currentDay = date;
+			daySpans = new List<TimeSpan>();
+			lastStart = null;
+			if (weekSpans == null)
+				weekSpans = new List<TimeSpan>();
+			var dateText = date.ToString(dateTimeFormat);
+			WriteToStream(dateText, writer);
+			var equals = new string(new object[dateText.Length].Select(o => '=').ToArray());
+			WriteToStream(@equals, writer);
+			return true;
 		}
 
 		private bool ProcessDateUnderline(string line, StreamWriter writer)
 		{
-			if (dayInEffect)
+			if (!dayInEffect)
+				return false;
+
+			var trimmed = line.Trim();
+
+			if (trimmed.Length > 0 && trimmed.Trim(new[] { '=' }).Length == 0)
 			{
-				var trimmed = line.Trim();
-				if (trimmed.Length > 0 && trimmed.Trim(new[] { '=' }).Length == 0)
-				{
-					//WriteDebug("\tIgnoring existing date underline.");
-					return true;
-				}
+				//WriteDebug("\tIgnoring existing date underline.");
+				return true;
 			}
 
 			return false;
@@ -269,66 +257,61 @@ namespace TimeTxt.Core
 
 		private bool ProcessTime(string line, StreamWriter writer)
 		{
-			if (dayInEffect && currentDay.HasValue && TimeParser.Matches(line))
+			if (!dayInEffect || !currentDay.HasValue || !TimeParser.Matches(line))
+				return false;
+
+			TimeSpan effectiveStart;
+
+			if (lastStart.HasValue)
+				effectiveStart = lastStart.Value;
+			else
 			{
-				TimeSpan effectiveStart;
-				if (lastStart.HasValue)
-					effectiveStart = lastStart.Value;
+				TimeSpan defaultStart;
+				if (earliestStart.HasValue)
+				{
+					var midnight = currentDay.Value.TimeOfDay;
+					var earliestStartTime = currentDay.Value.AddHours(earliestStart.Value).TimeOfDay;
+					defaultStart = midnight.Add(earliestStartTime);
+				}
 				else
-				{
-					TimeSpan defaultStart;
-					if (earliestStart.HasValue)
-					{
-						var midnight = currentDay.Value.TimeOfDay;
-						var earliestStartTime = currentDay.Value.AddHours(earliestStart.Value).TimeOfDay;
-						defaultStart = midnight.Add(earliestStartTime);
-					}
-					else
-						defaultStart = currentDay.Value.TimeOfDay;
+					defaultStart = currentDay.Value.TimeOfDay;
 
-					effectiveStart = defaultStart;
-				}
-
-				var parsed = TimeParser.Parse(line, currentDay.Value, effectiveStart);
-
-				//WriteDebug("\tWriting time as \"" + parsed.ToString(true) + "\".");
-				WriteToStream(parsed.ToString(true), writer);
-
-				lastStart = parsed.Start.TimeOfDay;
-
-				if (parsed.End.HasValue)
-				{
-					var duration = parsed.End.Value - parsed.Start;
-					daySpans.Add(duration);
-					weekSpans.Add(duration);
-				}
-
-				return true;
+				effectiveStart = defaultStart;
 			}
 
-			return false;
+			var parsed = TimeParser.Parse(line, currentDay.Value, effectiveStart);
+
+			//WriteDebug("\tWriting time as \"" + parsed.ToString(true) + "\".");
+			WriteToStream(parsed.ToString(true), writer);
+
+			lastStart = parsed.Start.TimeOfDay;
+
+			if (parsed.End.HasValue)
+			{
+				var duration = parsed.End.Value - parsed.Start;
+				daySpans.Add(duration);
+				weekSpans.Add(duration);
+			}
+
+			return true;
 		}
 
 		private bool ProcessDayTotal(string line, StreamWriter writer)
 		{
-			if (dayInEffect && line.StartsWith("Day: "))
-			{
-				dayInEffect = false;
-				return true;
-			}
+			if (!dayInEffect || !line.StartsWith("Day: "))
+				return false;
 
-			return false;
+			dayInEffect = false;
+			return true;
 		}
 
 		private bool ProcessWeekTotal(string line, StreamWriter writer)
 		{
-			if (line.StartsWith("Week: "))
-			{
-				dayInEffect = false;
-				return true;
-			}
+			if (!line.StartsWith("Week: "))
+				return false;
 
-			return false;
+			dayInEffect = false;
+			return true;
 		}
 	}
 }

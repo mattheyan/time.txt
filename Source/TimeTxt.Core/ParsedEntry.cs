@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace TimeTxt.Core
 {
@@ -19,7 +16,7 @@ namespace TimeTxt.Core
 
 		public string ToString(bool prependDuration)
 		{
-			StringBuilder builder = new StringBuilder();
+			var builder = new StringBuilder();
 
 			if (prependDuration && End.HasValue)
 			{
@@ -84,10 +81,7 @@ namespace TimeTxt.Core
 					builder.Append(End.Value.Minute.ToString("00"));
 				}
 
-				if (endPm)
-					builder.Append("p, ");
-				else
-					builder.Append("a, ");
+				builder.Append(endPm ? "p, " : "a, ");
 			}
 
 			if (Notes != null)

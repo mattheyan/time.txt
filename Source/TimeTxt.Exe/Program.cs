@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TimeTxt.Core;
 
 namespace TimeTxt.Exe
@@ -51,7 +48,7 @@ namespace TimeTxt.Exe
 						string argValue;
 						var argKeyAndValue = arg.Trim('/');
 
-						var argSplitIndex = argKeyAndValue.IndexOf(":");
+						var argSplitIndex = argKeyAndValue.IndexOf(":", StringComparison.Ordinal);
 						if (argSplitIndex > 0)
 						{
 							argKey = argKeyAndValue.Substring(0, argSplitIndex);
@@ -126,7 +123,8 @@ namespace TimeTxt.Exe
 						}
 						finally
 						{
-							buffer.Dispose();
+							if (buffer != null)
+								buffer.Dispose();
 						}
 					}
 					// Files are different, so they can be read from and written to at the same time

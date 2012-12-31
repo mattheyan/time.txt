@@ -16,15 +16,15 @@ namespace TimeTxt.Core
 
 		private int? earliestStart;
 
-		private bool lastLineWasEmpty;
+		//private bool lastLineWasEmpty;
 
-		private bool currentLineIsEmpty;
+		//private bool currentLineIsEmpty;
 
 		private DateTime? currentDay;
 
-		private int ignorableLines;
+		//private int ignorableLines;
 
-		private int emptyLines;
+		//private int emptyLines;
 
 		private TimeSpan? lastStart;
 
@@ -71,7 +71,6 @@ namespace TimeTxt.Core
 			lineProcessors = new List<Func<string, StreamWriter, bool>>
 				{
 					ProcessComment,
-					ProcessEmptyLine,
 					ProcessDateUnderline,
 					ProcessDate,
 					ProcessTime,
@@ -112,32 +111,17 @@ namespace TimeTxt.Core
 			string line;
 			while ((line = reader.ReadLine()) != null)
 			{
+				// Remote whitespace from beginning and end of line
+				line = line.Trim();
+
+				if (string.IsNullOrEmpty(line))
+					continue;
+
 				//WriteDebug(line);
 
-				currentLineIsEmpty = false;
-
-				var preIgnorableLines = ignorableLines;
-
-				bool processed = lineProcessors.Any(p => p(line, writer));
-
-				if (currentLineIsEmpty)
-					emptyLines += 1;
-				else
-					emptyLines = 0;
-
-				if (ignorableLines == preIgnorableLines)
-				{
-					//WriteDebug("\tLine was not ignorable, so resetting ignorable lines count.");
-					ignorableLines = 0;
-				}
-
-				if (!processed)
+				// Look for the first line processor to use the line.
+				if (!lineProcessors.Any(p => p(line, writer)))
 					throw new ApplicationException("The line \"" + line + "\" could not be processed." + (dayInEffect ? "" : "  No day currently in effect."));
-
-				if (currentLineIsEmpty)
-					//WriteDebug("\tLine was considered empty.");
-
-					lastLineWasEmpty = currentLineIsEmpty;
 			}
 
 			FinalizeDay(writer);
@@ -176,11 +160,8 @@ namespace TimeTxt.Core
 
 			if (weekSpans != null)
 			{
-				if (!lastLineWasEmpty)
-				{
-					//WriteDebug("\tLast line was not empty, so writing one now.");
-					WriteToStream("", writer);
-				}
+				//WriteDebug("\tWriting empty line before week total.");
+				WriteToStream("", writer);
 
 				if (weekSpans.Any())
 				{
@@ -204,11 +185,8 @@ namespace TimeTxt.Core
 
 			if (daySpans != null)
 			{
-				if (!lastLineWasEmpty)
-				{
-					//WriteDebug("\tLast line was not empty, so writing one now.");
-					WriteToStream("", writer);
-				}
+				//WriteDebug("\tWriting empty line before day total.");
+				WriteToStream("", writer);
 
 				if (daySpans.Any())
 				{
@@ -228,7 +206,6 @@ namespace TimeTxt.Core
 				currentDay = null;
 				daySpans = null;
 				lastStart = null;
-				lastLineWasEmpty = false;
 				return true;
 			}
 
@@ -240,24 +217,6 @@ namespace TimeTxt.Core
 			if (line.StartsWith("#"))
 			{
 				WriteToStream(line, writer);
-				return true;
-			}
-
-			return false;
-		}
-
-		private bool ProcessEmptyLine(string line, StreamWriter writer)
-		{
-			if (string.IsNullOrWhiteSpace(line))
-			{
-				//WriteDebug("\tLine is null or whitespace.");
-				currentLineIsEmpty = true;
-				if (emptyLines == ignorableLines)
-				{
-					//WriteDebug("\tSo far all ignroable lines are empty lines, so write the whitespace to the response.");
-					WriteToStream(line, writer);
-				}
-				ignorableLines++;
 				return true;
 			}
 
@@ -335,11 +294,11 @@ namespace TimeTxt.Core
 				//WriteDebug("\tWriting time as \"" + parsed.ToString(true) + "\".");
 				WriteToStream(parsed.ToString(true), writer);
 
-				lastStart = parsed.Start.Value.TimeOfDay;
+				lastStart = parsed.Start.TimeOfDay;
 
 				if (parsed.End.HasValue)
 				{
-					var duration = parsed.End.Value - parsed.Start.Value;
+					var duration = parsed.End.Value - parsed.Start;
 					daySpans.Add(duration);
 					weekSpans.Add(duration);
 				}
@@ -354,15 +313,7 @@ namespace TimeTxt.Core
 		{
 			if (dayInEffect && line.StartsWith("Day: "))
 			{
-				if (lastLineWasEmpty)
-				{
-					currentLineIsEmpty = true;
-					emptyLines--;
-				}
-
 				dayInEffect = false;
-				ignorableLines++;
-
 				return true;
 			}
 
@@ -373,16 +324,7 @@ namespace TimeTxt.Core
 		{
 			if (line.StartsWith("Week: "))
 			{
-				if (lastLineWasEmpty)
-				{
-					currentLineIsEmpty = true;
-					emptyLines--;
-				}
-
 				dayInEffect = false;
-
-				ignorableLines++;
-
 				return true;
 			}
 

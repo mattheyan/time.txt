@@ -62,21 +62,21 @@
     <Content Include="WhenADateIsStarted.ItIsReformattedFromAMinimalDate.approved.txt" />
     <Content Include="WhenADateIsStarted.ItIsReformattedFromAShortDate.approved.txt" />
     <Content Include="WhenAFullWeekIsEntered.TheSumCarriesOver24Hours.approved.txt" />
-    <Content Include="WhenATimeIsEnded.EndCanIncludeAM.approved.txt" />
-    <Content Include="WhenATimeIsEnded.EndCanIncludePM.approved.txt" />
+    <Content Include="WhenATimeIsEnded.EndCanIncludeAm.approved.txt" />
+    <Content Include="WhenATimeIsEnded.EndCanIncludePm.approved.txt" />
     <Content Include="WhenATimeIsEnded.ExistingDurationIsIgnoredEvenIfIncorrect.approved.txt" />
     <Content Include="WhenATimeIsEnded.ItCanSpanAcrossNoon.approved.txt" />
     <Content Include="WhenATimeIsEnded.ItCanSpanAcrossNoonWithoutNotes.approved.txt" />
     <Content Include="WhenATimeIsEnded.ItIsReformattedAndDurationsAreCalculated.approved.txt" />
-    <Content Include="WhenATimeIsEnded.StartCanIncludeAM.approved.txt" />
-    <Content Include="WhenATimeIsEnded.StartCanIncludePM.approved.txt" />
+    <Content Include="WhenATimeIsEnded.StartCanIncludeAm.approved.txt" />
+    <Content Include="WhenATimeIsEnded.StartCanIncludePm.approved.txt" />
     <Content Include="WhenATimeIsStarted.ItIsReformattedFromAMinimalTime.approved.txt" />
     <Content Include="WhenATimeIsStarted.ItIsReformattedFromAMinimalTimeWithComma.approved.txt" />
     <Content Include="WhenMultipleDaysAreEntered.TheCorrectSpacingIsUsed.approved.txt" />
     <Content Include="WhenNotesAreEntered.TheyArePreservedEvenIfTimeIsNotEnded.approved.txt" />
     <Content Include="WhenNotesAreEntered.TheyArePreservedInTheOutput.approved.txt" />
     <Content Include="WhenTheInputIsBlank.TheOutputIsBlank.approved.txt" />
-    <Content Include="WhenTheInputIsWhitespace.ItIsPreserved.approved.txt" />
+    <Content Include="WhenTheInputIsWhitespace.ItIsNotPreserved.approved.txt" />
     <Content Include="WhenTheLineStartsWithTheCommentCharacter.ItIsIgnored.approved.txt" />
     <Content Include="WhenTheTotalIsOverOneHalfHour.ItIsProperlyFormatted.approved.txt" />
   </ItemGroup>

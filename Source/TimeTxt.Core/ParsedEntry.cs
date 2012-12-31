@@ -8,7 +8,7 @@ namespace TimeTxt.Core
 {
 	public class ParsedEntry
 	{
-		public DateTime? Start { get; internal set; }
+		public DateTime Start { get; internal set; }
 		public DateTime? End { get; internal set; }
 		public string Notes { get; internal set; }
 
@@ -21,45 +21,42 @@ namespace TimeTxt.Core
 		{
 			StringBuilder builder = new StringBuilder();
 
-			if (prependDuration && Start.HasValue && End.HasValue)
+			if (prependDuration && End.HasValue)
 			{
-				var duration = End.Value - Start.Value;
+				var duration = End.Value - Start;
 				builder.Append("(");
 				builder.Append(duration.ToString("h\\:mm"));
 				builder.Append(") ");
 			}
 
-			if (Start.HasValue)
+			bool startPm;
+
+			if (Start.Hour == 12)
 			{
-				bool startPm;
-
-				if (Start.Value.Hour == 12)
-				{
-					startPm = true;
-					builder.Append("12");
-				}
-				else if (Start.Value.Hour > 12)
-				{
-					startPm = true;
-					builder.Append(Start.Value.Hour - 12);
-				}
-				else
-				{
-					startPm = false;
-					builder.Append(Start.Value.Hour);
-				}
-
-				if (Start.Value.Minute > 0)
-				{
-					builder.Append(":");
-					builder.Append(Start.Value.Minute.ToString("00"));
-				}
-
-				if (startPm)
-					builder.Append("p, ");
-				else
-					builder.Append("a, ");
+				startPm = true;
+				builder.Append("12");
 			}
+			else if (Start.Hour > 12)
+			{
+				startPm = true;
+				builder.Append(Start.Hour - 12);
+			}
+			else
+			{
+				startPm = false;
+				builder.Append(Start.Hour);
+			}
+
+			if (Start.Minute > 0)
+			{
+				builder.Append(":");
+				builder.Append(Start.Minute.ToString("00"));
+			}
+
+			if (startPm)
+				builder.Append("p, ");
+			else
+				builder.Append("a, ");
 
 			if (End.HasValue)
 			{

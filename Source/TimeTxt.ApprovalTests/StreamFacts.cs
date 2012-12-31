@@ -22,7 +22,7 @@ namespace TimeTxt.ApprovalTests
 		public class WhenTheInputIsWhitespace : StreamFact
 		{
 			[Fact]
-			public void ItIsPreserved()
+			public void ItIsNotPreserved()
 			{
 				Approvals.Verify(Update("\r\n  \r"));
 			}
@@ -33,54 +33,68 @@ namespace TimeTxt.ApprovalTests
 			[Fact]
 			public void ItIsReformattedFromAMinimalDate()
 			{
-				Approvals.Verify(Update("5/1"));
+				Approvals.Verify(Update(@"
+
+					5/1
+
+				"));
 			}
 
 			[Fact]
 			public void ExistingUnderlineIsIgnored()
 			{
-				Approvals.Verify(Update(
-@"5/1
-==============="
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					===============
+
+				"));
 			}
 
 			[Fact]
 			public void ItIsReformattedFromAShortDate()
 			{
-				Approvals.Verify(Update("05/01/2012"));
+				Approvals.Verify(Update(@"
+
+					05/01/2012
+
+				"));
 			}
 
 			[Fact]
 			public void ExistingDayTotalIsIgnored()
 			{
-				Approvals.Verify(Update(
-@"05/01/2012
+				Approvals.Verify(Update(@"
+					05/01/2012
 
-Day: 0:00"
-				));
+					Day: 0:00
+				"));
 			}
 
 			[Fact]
 			public void ExistingDayTotalIsIgnoredEvenIfIncorrect()
 			{
-				Approvals.Verify(Update(
-@"05/02/2012
+				Approvals.Verify(Update(@"
 
-Day: 1:00"
-				));
+					05/02/2012
+
+					Day: 1:00
+
+				"));
 			}
 
 			[Fact]
 			public void ExistingWeekTotalIsIgnored()
 			{
-				Approvals.Verify(Update(
-@"05/01/2012
+				Approvals.Verify(Update(@"
 
-Day: 0:00
+					05/01/2012
 
-Week: 0:00"
-				));
+					Day: 0:00
+
+					Week: 0:00
+
+				"));
 			}
 		}
 
@@ -89,19 +103,23 @@ Week: 0:00"
 			[Fact]
 			public void ItIsReformattedFromAMinimalTime()
 			{
-				Approvals.Verify(Update(
-@"5/1
-3"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					3
+
+				"));
 			}
 
 			[Fact]
 			public void ItIsReformattedFromAMinimalTimeWithComma()
 			{
-				Approvals.Verify(Update(
-@"5/1
-3,"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					3,
+
+				"));
 			}
 		}
 
@@ -110,73 +128,89 @@ Week: 0:00"
 			[Fact]
 			public void ItIsReformattedAndDurationsAreCalculated()
 			{
-				Approvals.Verify(Update(
-@"5/1
-3, 4:10"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					3, 4:10
+
+				"));
 			}
 
 			[Fact]
-			public void StartCanIncludeAM()
+			public void StartCanIncludeAm()
 			{
-				Approvals.Verify(Update(
-@"5/1
-9a, 12"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					9a, 12
+
+				"));
 			}
 
 			[Fact]
-			public void StartCanIncludePM()
+			public void StartCanIncludePm()
 			{
-				Approvals.Verify(Update(
-@"5/1
-1p, 3"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					1p, 3
+
+				"));
 			}
 
 			[Fact]
-			public void EndCanIncludeAM()
+			public void EndCanIncludeAm()
 			{
-				Approvals.Verify(Update(
-@"5/1
-9, 11a"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					9, 11a
+
+				"));
 			}
 
 			[Fact]
-			public void EndCanIncludePM()
+			public void EndCanIncludePm()
 			{
-				Approvals.Verify(Update(
-@"5/1
-1, 3p"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					1, 3p
+
+				"));
 			}
 
 			[Fact]
 			public void ItCanSpanAcrossNoonWithoutNotes()
 			{
-				Approvals.Verify(Update(
-@"5/1
-9, 9"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					9, 9
+
+				"));
 			}
 
 			[Fact]
 			public void ItCanSpanAcrossNoon()
 			{
-				Approvals.Verify(Update(
-@"5/1
-9, 9, blah"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					9, 9, blah
+
+				"));
 			}
 
 			[Fact]
 			public void ExistingDurationIsIgnoredEvenIfIncorrect()
 			{
-				Approvals.Verify(Update(
-@"5/1
-(0:05) 3, 4:10"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					(0:05) 3, 4:10
+
+				"));
 			}
 		}
 
@@ -185,19 +219,23 @@ Week: 0:00"
 			[Fact]
 			public void TheyArePreservedInTheOutput()
 			{
-				Approvals.Verify(Update(
-@"5/1
-3, 4:10, blah blah blah"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					3, 4:10, blah blah blah
+
+				"));
 			}
 
 			[Fact]
 			public void TheyArePreservedEvenIfTimeIsNotEnded()
 			{
-				Approvals.Verify(Update(
-@"5/1
-3, blah blah blah"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					3, blah blah blah
+
+				"));
 			}
 		}
 
@@ -206,20 +244,21 @@ Week: 0:00"
 			[Fact]
 			public void TheCorrectSpacingIsUsed()
 			{
-				Approvals.Verify(Update(
-	@"5/1
-3, 4, blah blah blah
+				Approvals.Verify(Update(@"
 
-Day: 1:00
+					5/1
+					3, 4, blah blah blah
 
-5/3
-4, 5, blah
+					Day: 1:00
 
-Day: 1:00
+					5/3
+					4, 5, blah
 
-Week: 1:00
-"
-				));
+					Day: 1:00
+
+					Week: 1:00
+
+				"));
 			}
 		}
 
@@ -228,23 +267,24 @@ Week: 1:00
 			[Fact]
 			public void TheSumCarriesOver24Hours()
 			{
-				Approvals.Verify(Update(
-	@"5/1
-9,5
+				Approvals.Verify(Update(@"
 
-5/2
-9,5
+					5/1
+					9,5
 
-5/3
-9,5
+					5/2
+					9,5
 
-5/4
-9,5
+					5/3
+					9,5
 
-5/5
-9,5
-"
-				));
+					5/4
+					9,5
+
+					5/5
+					9,5
+
+				"));
 			}
 		}
 
@@ -253,12 +293,13 @@ Week: 1:00
 			[Fact]
 			public void ItIsIgnored()
 			{
-				Approvals.Verify(Update(
-	@"5/1
-#8, 9, ...
-9,10, do stuff
-"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					#8, 9, ...
+					9,10, do stuff
+
+				"));
 			}
 		}
 
@@ -267,11 +308,12 @@ Week: 1:00
 			[Fact]
 			public void ItIsProperlyFormatted()
 			{
-				Approvals.Verify(Update(
-	@"5/1
-8:10, 9:42, do stuff
-"
-				));
+				Approvals.Verify(Update(@"
+
+					5/1
+					8:10, 9:42, do stuff
+
+				"));
 			}
 		}
 

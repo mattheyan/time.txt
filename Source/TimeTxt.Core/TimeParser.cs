@@ -68,13 +68,13 @@ namespace TimeTxt.Core
 				DateTime end;
 				if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + endText.ToUpper(), allowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out end))
 				{
-					if (end.TimeOfDay.Ticks > result.Start.Value.TimeOfDay.Ticks)
+					if (end.TimeOfDay.Ticks > result.Start.TimeOfDay.Ticks)
 						result.End = end;
 					else
 					{
 						var endPlus12Hours = end.AddHours(12);
 
-						if (endPlus12Hours.Date == day.Date && endPlus12Hours.Ticks > result.Start.Value.TimeOfDay.Ticks)
+						if (endPlus12Hours.Date == day.Date && endPlus12Hours.Ticks > result.Start.TimeOfDay.Ticks)
 							result.End = endPlus12Hours;
 						else
 							throw new InvalidOperationException();

@@ -6,8 +6,8 @@ using Xunit;
 
 namespace TimeTxt.ApprovalTests
 {
-	//[UseReporter(typeof(WinMergeReporter))]
-	[UseReporter(typeof(DiffReporter))]
+	[UseReporter(typeof(WinMergeReporter))]
+	//[UseReporter(typeof(DiffReporter))]
 	public class StreamFact
 	{
 		public class WhenTheInputIsBlank : StreamFact
@@ -45,7 +45,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					===============
 
 				"));
@@ -105,7 +105,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					3
 
 				"));
@@ -116,7 +116,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					3,
 
 				"));
@@ -130,7 +130,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					3, 4:10
 
 				"));
@@ -141,7 +141,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					9a, 12
 
 				"));
@@ -152,7 +152,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					1p, 3
 
 				"));
@@ -163,7 +163,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					9, 11a
 
 				"));
@@ -174,7 +174,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					1, 3p
 
 				"));
@@ -185,7 +185,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					9, 9
 
 				"));
@@ -196,7 +196,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					9, 9, blah
 
 				"));
@@ -207,7 +207,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					(0:05) 3, 4:10
 
 				"));
@@ -221,7 +221,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					3, 4:10, blah blah blah
 
 				"));
@@ -232,7 +232,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					3, blah blah blah
 
 				"));
@@ -246,12 +246,12 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					3, 4, blah blah blah
 
 					Day: 1:00
 
-					5/3
+					5/3/2012
 					4, 5, blah
 
 					Day: 1:00
@@ -269,19 +269,19 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					9,5
 
-					5/2
+					5/2/2012
 					9,5
 
-					5/3
+					5/3/2012
 					9,5
 
-					5/4
+					5/4/2012
 					9,5
 
-					5/5
+					5/5/2012
 					9,5
 
 				"));
@@ -295,7 +295,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					#8, 9, ...
 					9,10, do stuff
 
@@ -310,7 +310,7 @@ namespace TimeTxt.ApprovalTests
 			{
 				Approvals.Verify(Update(@"
 
-					5/1
+					5/1/2012
 					8:10, 9:42, do stuff
 
 				"));

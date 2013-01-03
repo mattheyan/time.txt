@@ -93,6 +93,8 @@ namespace TimeTxt.Exe
 
 				if (!string.IsNullOrEmpty(outputFileRaw))
 				{
+					var start = DateTime.Now;
+
 					var outputFilePath = Path.GetFullPath(outputFileRaw);
 
 					// If the input and output file are the same, read and write separately.
@@ -110,6 +112,10 @@ namespace TimeTxt.Exe
 							}
 
 							buffer.Seek(0, SeekOrigin.Begin);
+
+							// Clear the text file up front in the event that there is existing
+							// text and it is longer than the text that will be written.
+							File.WriteAllText(outputFilePath, String.Empty);
 
 							using (var fileWriter = new StreamWriter(File.OpenWrite(outputFilePath)))
 							{
@@ -130,6 +136,10 @@ namespace TimeTxt.Exe
 					// Files are different, so they can be read from and written to at the same time
 					else
 					{
+						// Clear the text file up front in the event that there is existing
+						// text and it is longer than the text that will be written.
+						File.WriteAllText(outputFilePath, String.Empty);
+
 						using (var fileInputStream = File.OpenRead(inputFilePath))
 						{
 							using (var fileOutputStream = File.OpenWrite(outputFilePath))
@@ -138,6 +148,10 @@ namespace TimeTxt.Exe
 							}
 						}
 					}
+
+					var end = DateTime.Now;
+					var duration = end - start;
+					Console.WriteLine(duration.ToString());
 				}
 				// No output file was speicifed, so write the output to standard out.
 				else

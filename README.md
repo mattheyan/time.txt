@@ -19,6 +19,21 @@ This:
 
 	Week: 8:00
 
-# Downloads #
+## Downloads ##
 
 [Download the latest version](downloads) and start tracking time with ease.
+
+## Development ##
+
+Solution and source can be found in the 'Source' directory.
+
+There are a few .bat files available to perform common tasks.
+
+A couple of example commands via PowerShell:
+
+	# Compile the solution (debug configuration) and run tests.
+	Invoke-psake .\Scripts\PsakeTasks.ps1 Test
+
+	# Deploy to Program Files (after building and running tests).
+	Invoke-psake .\Scripts\PsakeTasks.ps1 Deploy
+

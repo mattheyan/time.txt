@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Chronos;
 
 namespace TimeTxt.Core
 {
@@ -16,7 +17,7 @@ namespace TimeTxt.Core
 
 		private int? earliestStart;
 
-		private DateTime? currentDay;
+		private Date? currentDay;
 
 		private TimeSpan? lastStart;
 
@@ -213,9 +214,9 @@ namespace TimeTxt.Core
 
 		private bool ProcessDate(string line, StreamWriter writer)
 		{
-			DateTime date;
+			DateTime dateTime;
 
-			if (!DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out date))
+			if (!DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out dateTime))
 				return false;
 
 			//WriteDebug("\t" + line + " parsed as date " + date.ToString());
@@ -227,12 +228,12 @@ namespace TimeTxt.Core
 			}
 
 			dayInEffect = true;
-			currentDay = date;
+			currentDay = new Date(dateTime);
 			daySpans = new List<TimeSpan>();
 			lastStart = null;
 			if (weekSpans == null)
 				weekSpans = new List<TimeSpan>();
-			var dateText = date.ToString(dateTimeFormat);
+			var dateText = dateTime.ToString(dateTimeFormat);
 			WriteToStream(dateText, writer);
 			var equals = new string(new object[dateText.Length].Select(o => '=').ToArray());
 			WriteToStream(@equals, writer);
@@ -269,12 +270,12 @@ namespace TimeTxt.Core
 				TimeSpan defaultStart;
 				if (earliestStart.HasValue)
 				{
-					var midnight = currentDay.Value.TimeOfDay;
-					var earliestStartTime = currentDay.Value.AddHours(earliestStart.Value).TimeOfDay;
+					var midnight = currentDay.Value.LocalDate.TimeOfDay;
+					var earliestStartTime = currentDay.Value.LocalDate.AddHours(earliestStart.Value).TimeOfDay;
 					defaultStart = midnight.Add(earliestStartTime);
 				}
 				else
-					defaultStart = currentDay.Value.TimeOfDay;
+					defaultStart = currentDay.Value.LocalDate.TimeOfDay;
 
 				effectiveStart = defaultStart;
 			}

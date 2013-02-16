@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Chronos;
+using Chronos.Extensions;
 
 namespace TimeTxt.Core
 {
@@ -30,7 +32,7 @@ namespace TimeTxt.Core
 			return TimeRegex.IsMatch(input);
 		}
 
-		public static ParsedEntry Parse(string input, DateTime day, TimeSpan timeFloor)
+		public static ParsedEntry Parse(string input, Date day, TimeSpan timeFloor)
 		{
 			var match = TimeRegex.Match(input);
 
@@ -50,7 +52,7 @@ namespace TimeTxt.Core
 				{
 					var startPlus12Hours = start.AddHours(12);
 
-					if (startPlus12Hours.Date == day.Date && startPlus12Hours.Ticks >= timeFloor.Ticks)
+					if (startPlus12Hours.IsOn(day) && startPlus12Hours.Ticks >= timeFloor.Ticks)
 						result.Start = startPlus12Hours;
 					else
 						throw new InvalidOperationException();
@@ -72,7 +74,7 @@ namespace TimeTxt.Core
 					{
 						var endPlus12Hours = end.AddHours(12);
 
-						if (endPlus12Hours.Date == day.Date && endPlus12Hours.Ticks > result.Start.TimeOfDay.Ticks)
+						if (endPlus12Hours.IsOn(day) && endPlus12Hours.Ticks > result.Start.TimeOfDay.Ticks)
 							result.End = endPlus12Hours;
 						else
 							throw new InvalidOperationException();

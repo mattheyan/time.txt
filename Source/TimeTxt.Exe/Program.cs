@@ -9,6 +9,8 @@ namespace TimeTxt.Exe
 	{
 		static void Main(string[] args)
 		{
+			bool? successful = null;
+
 			// Display usage information
 			if (args.Length == 0 || args[0] == "/?" || args[1] == "/?")
 			{
@@ -108,7 +110,15 @@ namespace TimeTxt.Exe
 
 							using (var fileInputStream = File.OpenRead(inputFilePath))
 							{
-								new UpdateStreamProcessor().Update(fileInputStream, buffer);
+								string currentLine;
+								var processor = new UpdateStreamProcessor();
+								if (processor.Update(fileInputStream, buffer, true, out currentLine))
+									successful = true;
+								else
+								{
+									successful = false;
+									processor.WriteRecoveredData(buffer, currentLine, fileInputStream);
+								}
 							}
 
 							buffer.Seek(0, SeekOrigin.Begin);
@@ -144,7 +154,15 @@ namespace TimeTxt.Exe
 						{
 							using (var fileOutputStream = File.OpenWrite(outputFilePath))
 							{
-								new UpdateStreamProcessor().Update(fileInputStream, fileOutputStream);
+								string currentLine;
+								var processor = new UpdateStreamProcessor();
+								if (processor.Update(fileInputStream, fileOutputStream, true, out currentLine))
+									successful = true;
+								else
+								{
+									successful = false;
+									processor.WriteRecoveredData(fileOutputStream, currentLine, fileInputStream);
+								}
 							}
 						}
 					}
@@ -160,11 +178,22 @@ namespace TimeTxt.Exe
 					{
 						using (var standardOutputStream = Console.OpenStandardOutput())
 						{
-							new UpdateStreamProcessor().Update(fileInputStream, standardOutputStream);
+							string currentLine;
+							var processor = new UpdateStreamProcessor();
+							if (processor.Update(fileInputStream, standardOutputStream, true, out currentLine))
+								successful = true;
+							else
+							{
+								successful = false;
+								processor.WriteRecoveredData(standardOutputStream, currentLine, fileInputStream);
+							}
 						}
 					}
 				}
 			}
+
+			if (successful.HasValue && !successful.Value)
+				Environment.Exit(-1);
 		}
 
 		private static void ProgramUsage()

@@ -328,7 +328,10 @@ namespace TimeTxt.ApprovalTests
 				inputStream.Seek(0, SeekOrigin.Begin);
 
 				var outputStream = new MemoryStream();
-				new UpdateStreamProcessor(7).Update(inputStream, outputStream);
+
+				string currentLine;
+				new UpdateStreamProcessor(7).Update(inputStream, outputStream, false, out currentLine);
+
 				outputStream.Seek(0, SeekOrigin.Begin);
 				using (var reader = new StreamReader(outputStream))
 				{

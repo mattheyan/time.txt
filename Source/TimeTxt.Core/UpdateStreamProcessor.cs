@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Chronos;
 
 namespace TimeTxt.Core
@@ -91,7 +92,7 @@ namespace TimeTxt.Core
 			earliestStart = hour;
 		}
 
-		public void Update(Stream inputStream, Stream outputStream)
+		public bool Update(Stream inputStream, Stream outputStream, bool gracefulRecovery, out string currentLine)
 		{
 			//WriteDebug("Starting processing.\r\n=================\r\n", true);
 
@@ -101,26 +102,79 @@ namespace TimeTxt.Core
 			var reader = new StreamReader(inputStream);
 			var writer = new StreamWriter(outputStream);
 
-			string line;
-			while ((line = reader.ReadLine()) != null)
+			string line = null;
+
+			try
 			{
-				// Remote whitespace from beginning and end of line
-				line = line.Trim();
+				while ((line = reader.ReadLine()) != null)
+				{
+					// Remote whitespace from beginning and end of line
+					line = line.Trim();
 
-				if (string.IsNullOrEmpty(line))
-					continue;
+					if (string.IsNullOrEmpty(line))
+						continue;
 
-				//WriteDebug(line);
+					//WriteDebug(line);
 
-				// Look for the first line processor to use the line.
-				if (!lineProcessors.Any(p => p(line, writer)))
-					throw new ApplicationException("The line \"" + line + "\" could not be processed." + (dayInEffect ? "" : "  No day currently in effect."));
+					// Look for the first line processor to use the line.
+					if (!lineProcessors.Any(p => p(line, writer)))
+					{
+						if (!gracefulRecovery)
+							throw new UpdateException(line, dayInEffect);
+
+						currentLine = line;
+						return false;
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				throw new UpdateException(line, dayInEffect, e);
 			}
 
 			FinalizeDay(writer);
 			FinalizeWeek(writer);
 
 			//WriteDebug("=================\r\nFinished processing.");
+
+			currentLine = null;
+			return true;
+		}
+
+		public class UpdateException : Exception
+		{
+			public string Line { get; set; }
+
+			public bool DayInEffect { get; set; }
+
+			public UpdateException(string line, bool dayInEffect)
+			{
+				Line = line;
+				DayInEffect = dayInEffect;
+			}
+
+			public UpdateException(string line, bool dayInEffect, Exception innerException)
+				: base(GetMessage(line, dayInEffect, innerException), innerException)
+			{
+				Line = line;
+				DayInEffect = dayInEffect;
+			}
+
+			private static string GetMessage(string line, bool dayInEffect, Exception innerException)
+			{
+				var messageBuilder = new StringBuilder();
+				messageBuilder.AppendFormat("The line \"{0}\" could not be processed.", line);
+				if (!dayInEffect)
+					messageBuilder.Append(" No day currently in effect.");
+				if (innerException != null)
+					messageBuilder.AppendFormat(" Error: \"{0}\".", innerException.Message);
+				return messageBuilder.ToString();
+			}
+
+			public override string Message
+			{
+				get { return GetMessage(Line, DayInEffect, InnerException); }
+			}
 		}
 
 		private void WriteToStream(string text, StreamWriter writer)
@@ -313,6 +367,19 @@ namespace TimeTxt.Core
 
 			dayInEffect = false;
 			return true;
+		}
+
+		public void WriteRecoveredData(Stream outputStream, string currentLine, Stream inputStream)
+		{
+			var reader = new StreamReader(inputStream);
+			var writer = new StreamWriter(outputStream);
+
+			var line = currentLine;
+
+			do
+			{
+				writer.WriteLine(line);
+			} while ((line = reader.ReadLine()) != null);
 		}
 	}
 }

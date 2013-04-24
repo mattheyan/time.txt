@@ -54,6 +54,9 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>call powershell -Command "Import-Module $(SolutionDir)\packages\IDEbot.0.1.15.1\tools\idebot.psm1; Update-AssemblyVersion -Type BuildNumber;"</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

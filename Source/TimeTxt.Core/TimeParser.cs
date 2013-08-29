@@ -81,7 +81,7 @@ namespace TimeTxt.Core
 					}
 				}
 				else
-					throw new NotImplementedException();
+					throw new FormatException(string.Format("\"{0}\" is not a valid time.", endText));
 			}
 
 			var notes = match.Groups["notes"].Value;

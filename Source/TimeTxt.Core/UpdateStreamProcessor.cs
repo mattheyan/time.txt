@@ -117,7 +117,22 @@ namespace TimeTxt.Core
 					//WriteDebug(line);
 
 					// Look for the first line processor to use the line.
-					if (!lineProcessors.Any(p => p(line, writer)))
+					if (!lineProcessors.Any(p =>
+					{
+						try
+						{
+							return p(line, writer);
+						}
+						catch (Exception e)
+						{
+							if (!gracefulRecovery)
+								throw;
+
+							WriteToStream("# -> ERROR: " + e.Message, writer);
+							WriteToStream(line, writer);
+							return true;
+						}
+					}))
 					{
 						if (!gracefulRecovery)
 							throw new UpdateException(line, dayInEffect);

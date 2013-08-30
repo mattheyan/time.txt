@@ -7,6 +7,38 @@ namespace TimeTxt.Exe
 {
 	class Program
 	{
+		static TResult Retry<TResult>(Func<TResult> func)
+		{
+			var numAttempts = 0;
+			Exception lastException = null;
+
+			while (numAttempts < 5)
+			{
+				numAttempts++;
+
+				try
+				{
+					return func();
+				}
+				catch (Exception e)
+				{
+					lastException = e;
+				}
+			}
+
+			throw lastException;
+		}
+
+		static FileStream OpenWrite(string fileName)
+		{
+			return Retry(() => File.OpenWrite(fileName));
+		}
+
+		static FileStream OpenRead(string fileName)
+		{
+			return Retry(() => File.OpenRead(fileName));
+		}
+
 		static void Main(string[] args)
 		{
 			bool? successful = null;
@@ -108,7 +140,7 @@ namespace TimeTxt.Exe
 						{
 							buffer = new MemoryStream();
 
-							using (var fileInputStream = File.OpenRead(inputFilePath))
+							using (var fileInputStream = OpenRead(inputFilePath))
 							{
 								string currentLine;
 								var processor = new UpdateStreamProcessor();
@@ -127,7 +159,7 @@ namespace TimeTxt.Exe
 							// text and it is longer than the text that will be written.
 							File.WriteAllText(outputFilePath, String.Empty);
 
-							using (var fileWriter = new StreamWriter(File.OpenWrite(outputFilePath)))
+							using (var fileWriter = new StreamWriter(OpenWrite(outputFilePath)))
 							{
 								using (var bufferReader = new StreamReader(buffer))
 								{
@@ -150,9 +182,9 @@ namespace TimeTxt.Exe
 						// text and it is longer than the text that will be written.
 						File.WriteAllText(outputFilePath, String.Empty);
 
-						using (var fileInputStream = File.OpenRead(inputFilePath))
+						using (var fileInputStream = OpenRead(inputFilePath))
 						{
-							using (var fileOutputStream = File.OpenWrite(outputFilePath))
+							using (var fileOutputStream = OpenWrite(outputFilePath))
 							{
 								string currentLine;
 								var processor = new UpdateStreamProcessor();
@@ -174,7 +206,7 @@ namespace TimeTxt.Exe
 				// No output file was speicifed, so write the output to standard out.
 				else
 				{
-					using (var fileInputStream = File.OpenRead(inputFilePath))
+					using (var fileInputStream = OpenRead(inputFilePath))
 					{
 						using (var standardOutputStream = Console.OpenStandardOutput())
 						{

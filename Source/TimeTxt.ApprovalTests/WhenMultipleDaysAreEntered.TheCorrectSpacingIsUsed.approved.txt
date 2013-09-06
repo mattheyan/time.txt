@@ -1,12 +1,12 @@
 Tuesday, May 01, 2012
 =====================
-(1:00) 3p, 4p,          blah blah blah
+(1:00)  3p,     4p,     blah blah blah
 
 Day: 1:00
 
 Thursday, May 03, 2012
 ======================
-(1:00) 4p, 5p,          blah
+(1:00)  4p,     5p,     blah
 
 Day: 1:00
 

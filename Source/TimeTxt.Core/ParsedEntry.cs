@@ -9,11 +9,6 @@ namespace TimeTxt.Core
 		public DateTime? End { get; internal set; }
 		public string Notes { get; internal set; }
 
-		// Example:12:00a, 12:00p,
-		private const int maxTimeSizeWithoutDuration = 15;
-		// Example:(12:00) 12:00a, 12:00p,
-		private const int maxTimeSizeWithDuration = 23;
-
 		public override string ToString()
 		{
 			return ToString(false);
@@ -23,12 +18,31 @@ namespace TimeTxt.Core
 		{
 			var builder = new StringBuilder();
 
-			if (prependDuration && End.HasValue)
+			var targetLength = 0;
+
+			if (prependDuration)
 			{
-				var duration = End.Value - Start;
-				builder.Append("(");
-				builder.Append(duration.ToString("h\\:mm"));
-				builder.Append(") ");
+				// (##:##)
+				targetLength += 7;
+
+				if (End.HasValue)
+				{
+					var duration = End.Value - Start;
+					builder.Append("(");
+					builder.Append(duration.ToString("h\\:mm"));
+					builder.Append(")");
+
+					while (builder.Length < targetLength)
+						builder.Append(" ");
+
+					builder.Append(" ");
+					targetLength++;
+				}
+				else
+				{
+					// Account for space between duration and start that was not included
+					targetLength++;
+				}
 			}
 
 			bool startPm;
@@ -57,9 +71,16 @@ namespace TimeTxt.Core
 
 			builder.Append(startPm ? "p," : "a,");
 
+			// ##:##p,
+			targetLength += 7;
+
 			if (End.HasValue)
 			{
+				while (builder.Length < targetLength)
+					builder.Append(" ");
+
 				builder.Append(" ");
+				targetLength++;
 
 				bool endPm;
 
@@ -87,13 +108,23 @@ namespace TimeTxt.Core
 
 				builder.Append(endPm ? "p," : "a,");
 			}
+			else
+			{
+				// Account for space between start and end that was not included
+				targetLength++;
+			}
+
+			// ##:##p,
+			targetLength += 7;
 
 			if (!string.IsNullOrEmpty(Notes))
 			{
-				var targetLength = prependDuration ? maxTimeSizeWithDuration : maxTimeSizeWithoutDuration;
+				builder.Append(" ");
+				targetLength++;
+
 				while (builder.Length < targetLength)
 					builder.Append(" ");
-				builder.Append(" ");
+
 				builder.Append(Notes);
 			}
 

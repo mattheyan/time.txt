@@ -10,9 +10,9 @@ namespace TimeTxt.Core
 {
 	public static class TimeParser
 	{
-		private static readonly Regex TimeRegex = new Regex(@"^(?:\*?\(\d{1,2}\:\d{2}\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:,(?<notes>.*))?)?)|(?:,(?<notes>.*)))?)\s*$", RegexOptions.Compiled);
+		private static readonly Regex timeRegex = new Regex(@"^(?:\*?\(\d{1,2}\:\d{2}\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:,(?<notes>.*))?)?)|(?:,(?<notes>.*)))?)\s*$", RegexOptions.Compiled);
 
-		private static readonly string[] AllowedTimeFormats = GetAllowedTimeFormats().ToArray();
+		private static readonly string[] allowedTimeFormats = GetAllowedTimeFormats().ToArray();
 
 		private static IEnumerable<string> GetAllowedTimeFormats()
 		{
@@ -24,17 +24,17 @@ namespace TimeTxt.Core
 
 		public static bool IsTimeFormatAllowed(string format)
 		{
-			return AllowedTimeFormats.Contains(format);
+			return allowedTimeFormats.Contains(format);
 		}
 
 		public static bool Matches(string input)
 		{
-			return TimeRegex.IsMatch(input);
+			return timeRegex.IsMatch(input);
 		}
 
 		public static ParsedEntry Parse(string input, Date day, TimeSpan timeFloor)
 		{
-			var match = TimeRegex.Match(input);
+			var match = timeRegex.Match(input);
 
 			if (!match.Success)
 				return null;
@@ -44,7 +44,7 @@ namespace TimeTxt.Core
 			var startText = match.Groups["start"].Value;
 
 			DateTime start;
-			if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + startText.ToUpper(), AllowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out start))
+			if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + startText.ToUpper(), allowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out start))
 			{
 				if (start.TimeOfDay.Ticks >= timeFloor.Ticks)
 					result.Start = start;
@@ -66,7 +66,7 @@ namespace TimeTxt.Core
 			if (!string.IsNullOrWhiteSpace(endText))
 			{
 				DateTime end;
-				if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + endText.ToUpper(), AllowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out end))
+				if (DateTime.TryParseExact(day.ToString("yyyy/MM/dd") + " " + endText.ToUpper(), allowedTimeFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out end))
 				{
 					if (end.TimeOfDay.Ticks > result.Start.TimeOfDay.Ticks)
 						result.End = end;

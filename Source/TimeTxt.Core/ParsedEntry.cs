@@ -9,6 +9,11 @@ namespace TimeTxt.Core
 		public DateTime? End { get; internal set; }
 		public string Notes { get; internal set; }
 
+		// Example:12:00a, 12:00p,
+		private const int maxTimeSizeWithoutDuration = 15;
+		// Example:(12:00) 12:00a, 12:00p,
+		private const int maxTimeSizeWithDuration = 23;
+
 		public override string ToString()
 		{
 			return ToString(false);
@@ -50,13 +55,12 @@ namespace TimeTxt.Core
 				builder.Append(Start.Minute.ToString("00"));
 			}
 
-			if (startPm)
-				builder.Append("p, ");
-			else
-				builder.Append("a, ");
+			builder.Append(startPm ? "p," : "a,");
 
 			if (End.HasValue)
 			{
+				builder.Append(" ");
+
 				bool endPm;
 
 				if (End.Value.Hour == 12)
@@ -81,11 +85,17 @@ namespace TimeTxt.Core
 					builder.Append(End.Value.Minute.ToString("00"));
 				}
 
-				builder.Append(endPm ? "p, " : "a, ");
+				builder.Append(endPm ? "p," : "a,");
 			}
 
-			if (Notes != null)
+			if (!string.IsNullOrEmpty(Notes))
+			{
+				var targetLength = prependDuration ? maxTimeSizeWithDuration : maxTimeSizeWithoutDuration;
+				while (builder.Length < targetLength)
+					builder.Append(" ");
+				builder.Append(" ");
 				builder.Append(Notes);
+			}
 
 			return builder.ToString();
 		}

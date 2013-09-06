@@ -12,7 +12,7 @@ namespace TimeTxt.Core
 	{
 		private const string DefaultDateTimeFormat = "dddd, MMMM dd, yyyy";
 
-		private static readonly string[] DefaultMonthDayFormats = new[] { "M/d", "MM/dd", "M/dd", "MM/d" };
+		private static readonly string[] defaultMonthDayFormats = new[] { "M/d", "MM/dd", "M/dd", "MM/d" };
 
 		private string dateTimeFormat;
 
@@ -78,9 +78,9 @@ namespace TimeTxt.Core
 			dateTimeFormat = format;
 
 			acceptableDateFormatsList = new List<string>();
-			acceptableDateFormatsList.AddRange(DefaultMonthDayFormats);
-			acceptableDateFormatsList.AddRange(DefaultMonthDayFormats.Select(f => f + "/yy"));
-			acceptableDateFormatsList.AddRange(DefaultMonthDayFormats.Select(f => f + "/yyyy"));
+			acceptableDateFormatsList.AddRange(defaultMonthDayFormats);
+			acceptableDateFormatsList.AddRange(defaultMonthDayFormats.Select(f => f + "/yy"));
+			acceptableDateFormatsList.AddRange(defaultMonthDayFormats.Select(f => f + "/yyyy"));
 			acceptableDateFormatsList.Add(format);
 		}
 

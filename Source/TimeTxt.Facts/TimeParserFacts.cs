@@ -28,8 +28,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, ");
-				parsed.ToString(true).Should().Equal("3a, ");
+				parsed.ToString().Should().Equal("3a,");
+				parsed.ToString(true).Should().Equal("3a,");
 			}
 
 			[Fact]
@@ -40,8 +40,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockPM());
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3p, ");
-				parsed.ToString(true).Should().Equal("3p, ");
+				parsed.ToString().Should().Equal("3p,");
+				parsed.ToString(true).Should().Equal("3p,");
 			}
 
 			[Fact]
@@ -52,8 +52,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(12.OClockPM());
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("12p, ");
-				parsed.ToString(true).Should().Equal("12p, ");
+				parsed.ToString().Should().Equal("12p,");
+				parsed.ToString(true).Should().Equal("12p,");
 			}
 
 		}
@@ -74,8 +74,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, ");
-				parsed.ToString(true).Should().Equal("3a, ");
+				parsed.ToString().Should().Equal("3a,");
+				parsed.ToString(true).Should().Equal("3a,");
 			}
 		}
 
@@ -113,8 +113,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, ");
-				parsed.ToString(true).Should().Equal("3a, ");
+				parsed.ToString().Should().Equal("3a,");
+				parsed.ToString(true).Should().Equal("3a,");
 			}
 
 			[Fact]
@@ -125,8 +125,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockPM());
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3p, ");
-				parsed.ToString(true).Should().Equal("3p, ");
+				parsed.ToString().Should().Equal("3p,");
+				parsed.ToString(true).Should().Equal("3p,");
 			}
 		}
 
@@ -146,8 +146,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockAM().Add(5.Minutes()));
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3:05a, ");
-				parsed.ToString(true).Should().Equal("3:05a, ");
+				parsed.ToString().Should().Equal("3:05a,");
+				parsed.ToString(true).Should().Equal("3:05a,");
 			}
 
 			[Fact]
@@ -158,8 +158,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockPM().Add(10.Minutes()));
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3:10p, ");
-				parsed.ToString(true).Should().Equal("3:10p, ");
+				parsed.ToString().Should().Equal("3:10p,");
+				parsed.ToString(true).Should().Equal("3:10p,");
 			}
 		}
 
@@ -190,8 +190,8 @@ namespace TimeTxt.Facts
 				parsed.End.Value.Date.Should().Equal(DateTime.Today);
 				parsed.End.Value.TimeOfDay.Should().Equal(4.OClockAM());
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, 4a, ");
-				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a, ");
+				parsed.ToString().Should().Equal("3a, 4a,");
+				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a,");
 			}
 
 			[Fact]
@@ -204,8 +204,8 @@ namespace TimeTxt.Facts
 				parsed.End.Value.Date.Should().Equal(DateTime.Today);
 				parsed.End.Value.TimeOfDay.Should().Equal(3.OClockPM());
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, 3p, ");
-				parsed.ToString(true).Should().Equal("(12:00) 3a, 3p, ");
+				parsed.ToString().Should().Equal("3a, 3p,");
+				parsed.ToString(true).Should().Equal("(12:00) 3a, 3p,");
 			}
 		}
 
@@ -227,8 +227,8 @@ namespace TimeTxt.Facts
 				parsed.End.Value.Date.Should().Equal(DateTime.Today);
 				parsed.End.Value.TimeOfDay.Should().Equal(4.OClockAM());
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, 4a, ");
-				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a, ");
+				parsed.ToString().Should().Equal("3a, 4a,");
+				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a,");
 			}
 		}
 
@@ -250,8 +250,8 @@ namespace TimeTxt.Facts
 				parsed.End.Value.Date.Should().Equal(DateTime.Today);
 				parsed.End.Value.TimeOfDay.Should().Equal(4.OClockAM());
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, 4a, ");
-				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a, ");
+				parsed.ToString().Should().Equal("3a, 4a,");
+				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a,");
 			}
 		}
 
@@ -273,8 +273,8 @@ namespace TimeTxt.Facts
 				parsed.End.Value.Date.Should().Equal(DateTime.Today);
 				parsed.End.Value.TimeOfDay.Should().Equal(4.OClockAM());
 				parsed.Notes.Should().Be.Null();
-				parsed.ToString().Should().Equal("3a, 4a, ");
-				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a, ");
+				parsed.ToString().Should().Equal("3a, 4a,");
+				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a,");
 			}
 		}
 
@@ -297,8 +297,8 @@ namespace TimeTxt.Facts
 				parsed.End.Value.Date.Should().Equal(DateTime.Today);
 				parsed.End.Value.TimeOfDay.Should().Equal(4.OClockAM());
 				parsed.Notes.Should().Equal("blah, blah, blah");
-				parsed.ToString().Should().Equal("3a, 4a, blah, blah, blah");
-				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a, blah, blah, blah");
+				parsed.ToString().Should().Equal("3a, 4a,         blah, blah, blah");
+				parsed.ToString(true).Should().Equal("(1:00) 3a, 4a,          blah, blah, blah");
 			}
 		}
 
@@ -320,8 +320,8 @@ namespace TimeTxt.Facts
 				parsed.End.Value.Date.Should().Equal(DateTime.Today);
 				parsed.End.Value.TimeOfDay.Should().Equal(4.OClockPM().Add(1.Minutes()));
 				parsed.Notes.Should().Equal("computer setup, perf analysis, discuss various bugs");
-				parsed.ToString().Should().Equal("1:37p, 4:01p, computer setup, perf analysis, discuss various bugs");
-				parsed.ToString(true).Should().Equal("(2:24) 1:37p, 4:01p, computer setup, perf analysis, discuss various bugs");
+				parsed.ToString().Should().Equal("1:37p, 4:01p,   computer setup, perf analysis, discuss various bugs");
+				parsed.ToString(true).Should().Equal("(2:24) 1:37p, 4:01p,    computer setup, perf analysis, discuss various bugs");
 			}
 		}
 
@@ -341,8 +341,8 @@ namespace TimeTxt.Facts
 				parsed.Start.TimeOfDay.Should().Equal(3.OClockAM());
 				parsed.End.ShouldNotHaveValue();
 				parsed.Notes.Should().Equal("blah, blah, blah");
-				parsed.ToString().Should().Equal("3a, blah, blah, blah");
-				parsed.ToString(true).Should().Equal("3a, blah, blah, blah");
+				parsed.ToString().Should().Equal("3a,             blah, blah, blah");
+				parsed.ToString(true).Should().Equal("3a,                     blah, blah, blah");
 			}
 		}
 	}

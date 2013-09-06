@@ -1,4 +1,5 @@
 *.suo
+*.DotSettings.user
 *.csproj.user
 bin/
 obj/

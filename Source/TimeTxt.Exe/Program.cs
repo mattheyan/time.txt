@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using TimeTxt.Core;
 
 namespace TimeTxt.Exe
@@ -23,6 +24,7 @@ namespace TimeTxt.Exe
 				catch (Exception e)
 				{
 					lastException = e;
+					Thread.Sleep(500);
 				}
 			}
 

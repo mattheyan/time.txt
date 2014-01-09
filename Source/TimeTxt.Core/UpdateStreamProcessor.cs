@@ -254,7 +254,7 @@ namespace TimeTxt.Core
 			if (daySpans.Any())
 			{
 				var totalDaySpan = daySpans.Aggregate((l, r) => l + r);
-				var sum = totalDaySpan.ToString("h\\:mm");
+				var sum = totalDaySpan.ToString("h\\:mm", CultureInfo.InvariantCulture);
 
 				//WriteDebug("\tWriting day value: " + sum + ".");
 				WriteToStream("Day: " + sum, writer);
@@ -285,7 +285,7 @@ namespace TimeTxt.Core
 		{
 			DateTime dateTime;
 
-			if (!DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.CurrentCulture, DateTimeStyles.AssumeLocal, out dateTime))
+			if (!DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTime))
 				return false;
 
 			//WriteDebug("\t" + line + " parsed as date " + date.ToString());

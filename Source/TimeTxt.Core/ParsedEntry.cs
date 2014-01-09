@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 
 namespace TimeTxt.Core
@@ -29,7 +30,7 @@ namespace TimeTxt.Core
 				{
 					var duration = End.Value - Start;
 					builder.Append("(");
-					builder.Append(duration.ToString("h\\:mm"));
+					builder.Append(duration.ToString("h\\:mm", CultureInfo.InvariantCulture));
 					builder.Append(")");
 
 					while (builder.Length < targetLength)

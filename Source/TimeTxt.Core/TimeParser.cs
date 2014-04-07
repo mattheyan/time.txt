@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Chronos;
-using Chronos.Extensions;
+using TimeTxt.Core.Extensions;
 
 namespace TimeTxt.Core
 {

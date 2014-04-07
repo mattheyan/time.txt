@@ -30,22 +30,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Chronos, Version=0.1.13.1, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Chronos.0.1.13.1\lib\net35\Chronos.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Date.cs" />
+    <Compile Include="Extensions\DateTimeExtensions.cs" />
     <Compile Include="ParsedEntry.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimeParser.cs" />
     <Compile Include="UpdateStreamProcessor.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,7 +1,7 @@
 ﻿using System;
-using Chronos;
 using Should;
 using Should.Fluent;
+using TimeTxt.Core;
 using Xunit;
 
 namespace TimeTxt.Facts

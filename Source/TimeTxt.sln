@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeTxt.Core", "TimeTxt.Core\TimeTxt.Core.csproj", "{3EA3A6EB-4E8C-416C-84BE-CD5DEC5A619E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeTxt.Exe", "TimeTxt.Exe\TimeTxt.Exe.csproj", "{DBD80A22-B544-4B1D-AEFD-DF32518B0BAB}"

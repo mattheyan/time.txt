@@ -37,3 +37,5 @@ A couple of example commands via PowerShell:
 	# Deploy to Program Files (after building and running tests).
 	Invoke-psake .\Scripts\PsakeTasks.ps1 Deploy
 
+App Icon: http://commons.wikimedia.org/wiki/File:Current_event_clock.svg
+Exit Icon: http://commons.wikimedia.org/wiki/File:Red_x_small.PNG

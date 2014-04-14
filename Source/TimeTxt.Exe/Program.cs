@@ -1,13 +1,18 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Windows.Forms;
 using TimeTxt.Core;
+using TimeTxt.Exe.Properties;
 
 namespace TimeTxt.Exe
 {
-	class Program
+	static class Program
 	{
+		private static readonly object FileWriterMutex = new object();
+
 		static TResult Retry<TResult>(Func<TResult> func)
 		{
 			var numAttempts = 0;
@@ -41,210 +46,202 @@ namespace TimeTxt.Exe
 			return Retry(() => File.OpenRead(fileName));
 		}
 
-		static void Main(string[] args)
+		/// <summary>
+		/// The main entry point for the application.
+		/// </summary>
+		[STAThread]
+		static void Main()
 		{
-			bool? successful = null;
+			ITextLogger logger = null;
 
-			// Display usage information
-			if (args.Length == 0 || args[0] == "/?" || args[1] == "/?")
+			try
 			{
-				if (args.Length >= 2 && (args[0] == "/?" || args[1] == "/?"))
-					TaskUsage(args[1]);
-				else
-					ProgramUsage();
+				Application.EnableVisualStyles();
+				Application.SetCompatibleTextRenderingDefault(false);
 
-				Environment.Exit(args.Length >= 1 && (args[0] == "/?" || args[1] == "/?") ? 0 : -1);
-			}
-
-			if (args[0].Equals("update", StringComparison.CurrentCultureIgnoreCase))
-			{
-				if (args.Length < 2)
+				using (var trayIcon = new TrayIcon())
 				{
-					TaskUsage("update");
-					Environment.Exit(args.Length >= 1 && (args[0] == "/?" || args[1] == "/?") ? 0 : -1);
-				}
+					logger = CreateLogger();
+					trayIcon.UseLogger(logger);
 
-				bool launchDebugger = false;
+					trayIcon.Display();
 
-				string backupFilePath = null;
-
-				var inputFileRaw = args[1];
-				var inputFilePath = Path.GetFullPath(inputFileRaw);
-
-				string outputFileRaw = null;
-
-				if (args.Length > 2)
-				{
-					foreach (string arg in args.Skip(2))
+					if (string.IsNullOrEmpty(Settings.Default.TargetFile))
 					{
-						if (!arg.StartsWith("/"))
-							throw new ArgumentException("Invalid option \"" + arg + "\".");
+						logger.WriteLine("Attempting to find time.txt file...");
 
-						string argKey;
-						string argValue;
-						var argKeyAndValue = arg.Trim('/');
-
-						var argSplitIndex = argKeyAndValue.IndexOf(":", StringComparison.Ordinal);
-						if (argSplitIndex > 0)
+						var homeDir = Path.Combine(@"C:\Users", Environment.UserName);
+						var dropboxDir = Path.Combine(homeDir, "Dropbox");
+						if (!Directory.Exists(dropboxDir))
 						{
-							argKey = argKeyAndValue.Substring(0, argSplitIndex);
-							argValue = argKeyAndValue.Substring(argSplitIndex + 1);
-						}
-						else
-						{
-							argKey = argKeyAndValue;
-							argValue = null;
+							logger.WriteLine("ERROR: Dropbox not found!");
+							return;
 						}
 
-						if (argKey == "out")
-							outputFileRaw = argValue;
-						else if (argKey == "backup")
+						var timeTxtDropboxFile = Path.Combine(dropboxDir, @"Apps\time.txt\time.txt");
+						if (!File.Exists(timeTxtDropboxFile))
 						{
-							if (!string.IsNullOrEmpty(argValue))
-							{
-								backupFilePath = Path.GetFullPath(argValue);
-
-								// If backup path is a directory, generate a file with timestamp in that directory.
-								if (Directory.Exists(backupFilePath))
-									backupFilePath = Path.Combine(argValue, Path.GetFileName(inputFilePath) + DateTime.Now.ToString("yyyyMMdd_hhmmss") + ".backup.txt");
-							}
-							else
-							{
-								// If no value is specified, generate a file with timestamp in the same directory as the input file.
-								backupFilePath = inputFilePath + DateTime.Now.ToString("yyyyMMdd_hhmmss") + ".backup.txt";
-							}
+							logger.WriteLine("File 'time.txt' not found!");
+							return;
 						}
-						else if (argKey == "launch")
-							launchDebugger = true;
-						else
-							throw new ArgumentException("Unknown option \"" + argKey + "\".");
-					}
-				}
 
-				if (launchDebugger)
-					System.Diagnostics.Debugger.Launch();
-
-				if (!string.IsNullOrEmpty(backupFilePath))
-					File.Copy(inputFilePath, backupFilePath);
-
-				if (!string.IsNullOrEmpty(outputFileRaw))
-				{
-					var start = DateTime.Now;
-
-					var outputFilePath = Path.GetFullPath(outputFileRaw);
-
-					// If the input and output file are the same, read and write separately.
-					if (outputFilePath == inputFilePath)
-					{
-						Stream buffer = null;
-
-						try
-						{
-							buffer = new MemoryStream();
-
-							using (var fileInputStream = OpenRead(inputFilePath))
-							{
-								string currentLine;
-								var processor = new UpdateStreamProcessor();
-								if (processor.Update(fileInputStream, buffer, true, out currentLine))
-									successful = true;
-								else
-								{
-									successful = false;
-									processor.WriteRecoveredData(buffer, currentLine, fileInputStream);
-								}
-							}
-
-							buffer.Seek(0, SeekOrigin.Begin);
-
-							// Clear the text file up front in the event that there is existing
-							// text and it is longer than the text that will be written.
-							File.WriteAllText(outputFilePath, String.Empty);
-
-							using (var fileWriter = new StreamWriter(OpenWrite(outputFilePath)))
-							{
-								using (var bufferReader = new StreamReader(buffer))
-								{
-									string line;
-									while ((line = bufferReader.ReadLine()) != null)
-										fileWriter.WriteLine(line);
-								}
-							}
-						}
-						finally
-						{
-							if (buffer != null)
-								buffer.Dispose();
-						}
-					}
-					// Files are different, so they can be read from and written to at the same time
-					else
-					{
-						// Clear the text file up front in the event that there is existing
-						// text and it is longer than the text that will be written.
-						File.WriteAllText(outputFilePath, String.Empty);
-
-						using (var fileInputStream = OpenRead(inputFilePath))
-						{
-							using (var fileOutputStream = OpenWrite(outputFilePath))
-							{
-								string currentLine;
-								var processor = new UpdateStreamProcessor();
-								if (processor.Update(fileInputStream, fileOutputStream, true, out currentLine))
-									successful = true;
-								else
-								{
-									successful = false;
-									processor.WriteRecoveredData(fileOutputStream, currentLine, fileInputStream);
-								}
-							}
-						}
+						logger.WriteLine("Disovered time.txt file in Dropbox.");
+						Settings.Default.TargetFile = timeTxtDropboxFile;
+						Settings.Default.Save();
 					}
 
-					var end = DateTime.Now;
-					var duration = end - start;
-					Console.WriteLine(duration.ToString());
-				}
-				// No output file was speicifed, so write the output to standard out.
-				else
-				{
-					using (var fileInputStream = OpenRead(inputFilePath))
-					{
-						using (var standardOutputStream = Console.OpenStandardOutput())
-						{
-							string currentLine;
-							var processor = new UpdateStreamProcessor();
-							if (processor.Update(fileInputStream, standardOutputStream, true, out currentLine))
-								successful = true;
-							else
-							{
-								successful = false;
-								processor.WriteRecoveredData(standardOutputStream, currentLine, fileInputStream);
-							}
-						}
-					}
+					trayIcon.AddDependent(AutoUpdateFile(Settings.Default.TargetFile, logger));
+
+					Application.Run();
 				}
 			}
+			catch (Exception e)
+			{
+				if (logger != null)
+					logger.WriteLine("ERROR: {0}", e.Message);
+				else
+					EventLog.WriteEntry("time.txt", e.Message, EventLogEntryType.Error);
 
-			if (successful.HasValue && !successful.Value)
-				Environment.Exit(-1);
+				throw;
+			}
 		}
 
-		private static void ProgramUsage()
+		private static ITextLogger CreateLogger()
 		{
-			Console.WriteLine("timetxt /? update");
+			var userDataDir = Path.Combine(Path.Combine(@"C:\Users", Environment.UserName), @"AppData\Local\Time.txt");
+			if (!Directory.Exists(userDataDir))
+				Directory.CreateDirectory(userDataDir);
+
+			var logFileCreated = false;
+			var logFile = Path.Combine(userDataDir, "log.txt");
+
+			if (!File.Exists(logFile))
+			{
+				File.Create(logFile);
+				logFileCreated = true;
+			}
+
+			var logger = new Logger(logFile);
+
+			if (logFileCreated)
+				logger.WriteLine("Log file initialized.");
+
+			return logger;
 		}
 
-		private static void TaskUsage(string task)
+		private static IDisposable AutoUpdateFile(string file, ITextLogger logger)
 		{
-			if (task.Equals("update", StringComparison.CurrentCultureIgnoreCase))
+			var directoryName = Path.GetDirectoryName(file);
+			if (directoryName == null)
+				throw new ApplicationException(string.Format("Could not get directory name for file '{0}'.", file));
+
+			var fileName = Path.GetFileName(file);
+			if (fileName == null)
+				throw new ApplicationException(string.Format("Could not get file name for file '{0}'.", file));
+
+			var watcher = new FileSystemWatcher(directoryName);
+
+			watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
+			watcher.Filter = "*.txt";
+
+			DateTime? lastUpdatedTime = null;
+
+			watcher.Changed += (sender, args) =>
 			{
-				Console.WriteLine("timetxt update .\\path\\to\\time.txt");
-			}
-			else
-			{
-				throw new NotImplementedException();
-			}
+				try
+				{
+					logger.WriteLine("Detected change to file '{0}'.", args.FullPath);
+
+					lock (FileWriterMutex)
+					{
+						if (args.FullPath.Equals(file, StringComparison.InvariantCultureIgnoreCase))
+						{
+							if (!lastUpdatedTime.HasValue || File.GetLastWriteTime(file) > lastUpdatedTime)
+							{
+								var userDataDir = Path.Combine(Path.Combine(@"C:\Users", Environment.UserName), @"AppData\Local\Time.txt");
+
+								var backupsDir = Path.Combine(userDataDir, "Backups");
+								if (!Directory.Exists(backupsDir))
+									Directory.CreateDirectory(backupsDir);
+
+								var backupFilePath = Path.Combine(backupsDir, DateTime.Now.ToString("yyyyMMdd_hhmmss") + ".backup.txt");
+								logger.WriteLine("Backing up file '{0}' to '{1}'...", file, backupFilePath);
+								File.Copy(file, backupFilePath);
+
+								logger.WriteLine("Updating file '{0}'...", file);
+
+								bool successful;
+
+								var start = DateTime.Now;
+
+								Stream buffer = null;
+
+								try
+								{
+									buffer = new MemoryStream();
+
+									using (var fileInputStream = OpenRead(file))
+									{
+										string currentLine;
+										var processor = new UpdateStreamProcessor();
+										if (processor.Update(fileInputStream, buffer, true, out currentLine))
+											successful = true;
+										else
+										{
+											successful = false;
+											processor.WriteRecoveredData(buffer, currentLine, fileInputStream);
+										}
+									}
+
+									buffer.Seek(0, SeekOrigin.Begin);
+
+									// Clear the text file up front in the event that there is existing
+									// text and it is longer than the text that will be written.
+									File.WriteAllText(file, string.Empty);
+
+									using (var fileWriter = new StreamWriter(OpenWrite(file)))
+									{
+										using (var bufferReader = new StreamReader(buffer))
+										{
+											string line;
+											while ((line = bufferReader.ReadLine()) != null)
+												fileWriter.WriteLine(line);
+										}
+									}
+								}
+								finally
+								{
+									if (buffer != null)
+										buffer.Dispose();
+								}
+
+								if (successful)
+								{
+									var end = DateTime.Now;
+									var duration = end - start;
+
+									lastUpdatedTime = File.GetLastWriteTime(file);
+
+									logger.WriteLine("Operation complete: {0}!", duration);
+								}
+								else
+								{
+									logger.WriteLine("Operation failed.");
+								}
+							}
+						}
+					}
+				}
+				catch (Exception fwe)
+				{
+					logger.WriteLine("ERROR: {0}", fwe.Message);
+					throw;
+				}
+			};
+
+			watcher.EnableRaisingEvents = true;
+
+			return watcher;
 		}
 	}
 }

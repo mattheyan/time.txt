@@ -1,5 +1,7 @@
 *.suo
+.pack
 *.DotSettings.user
 *.csproj.user
+*.csproj.bak
 bin/
 obj/

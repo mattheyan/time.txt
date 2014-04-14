@@ -72,6 +72,47 @@ task Deploy -depends BuildAll,Test {
 	write-host "Done!"
 }
 
+# Package tasks
+###############
+
+task Package -depends BuildAll,Test {
+	if (Test-Path ..\.pack) {
+		Write-Host "Deleting existing artifacts..."
+		Remove-Item ..\.pack -Recurse -Force | Out-Null
+		Remove-Item ..\.pack -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+	}
+
+	# Create .pack folders
+	New-Item ..\.pack\tools -Type Directory -Force | Out-Null
+
+	# Copy the application binaries into the pack directory
+	Write-Host "Copying binaries to the pack directory..."
+	$targetDir = Resolve-Path ..\.pack\tools
+	$binDir = Join-Path $targetDir "bin"
+	New-Item $binDir -Type Directory | Out-Null
+	robocopy (Resolve-Path ..\Source\Timetxt.Exe\bin\Debug) $binDir /xf *vshost* /MIR | Out-Null
+
+	# Temporarily move to the pack directory and run the package command
+	Write-Host "Moving files for $PackageType package..."
+	Copy-Item ..\Time.txt.Install.nuspec ..\.pack | Out-Null
+	Write-Host "Copying installer script..."
+	Copy-Item ..\chocolateyInstall.ps1 ..\.pack\tools\chocolateyInstall.ps1 | Out-Null
+	Write-Host "Copying uninstaller script..."
+	Copy-Item ..\chocolateyUninstall.ps1 ..\.pack\tools\chocolateyUninstall.ps1 | Out-Null
+
+	Write-Host "Packing..."
+	Push-Location ..\.pack
+	try {
+		cpack
+	}
+	finally {
+		Pop-Location
+	}
+
+	# Copy the resulting package into the root directory
+	Move-Item ..\.pack\*.nupkg ..\ -Force | Out-Null
+}
+
 # Common helper functions
 #########################
 

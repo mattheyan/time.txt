@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>time.txt.install</id>
+	<title>Time.txt</title>
+    <version>2.0.1</version>
+    <authors>Bryan Matthews</authors>
+    <owners>Bryan Matthews</owners>
+    <projectUrl>https://github.com/mattheyan/time.txt</projectUrl>
+    <summary>A formatted text file for tracking time.</summary>
+    <description>A formatted text file for tracking time. Inspired by time.txt.</description>
+    <releaseNotes>
+
+Time.txt 2.0.1, 2014-04-14
+===============================
+- Implement background application minized to system tray.
+
+	</releaseNotes>
+    <tags></tags>
+  </metadata>
+</package>

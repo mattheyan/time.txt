@@ -8,6 +8,12 @@ try {
 		$programFiles86 = $env:ProgramFiles
 	}
 
+	# Close running application
+	if (Get-Process -Name timetxt -ErrorAction SilentlyContinue) {
+		Write-Host "Stopping process..."
+		taskkill.exe /IM timetxt.exe /F
+	}
+
 	# Ensure target directory
 	$targetDir = "$programFiles86\Time.txt"
 	if (Test-Path $targetDir) {

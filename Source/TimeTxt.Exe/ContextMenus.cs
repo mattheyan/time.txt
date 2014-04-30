@@ -15,7 +15,10 @@ namespace TimeTxt.Exe
 
 			var appVersion = Assembly.GetEntryAssembly().GetName().Version;
 
-			menu.Items.Add(string.Format("{0} v{1}", Resources.AppTitle, appVersion));
+			var versionItem = menu.Items.Add(string.Format("{0} v{1}", Resources.AppTitle, appVersion));
+
+			// Don't enable clicking the version text.
+			versionItem.Enabled = false;
 
 			var sep = new ToolStripSeparator();
 			menu.Items.Add(sep);

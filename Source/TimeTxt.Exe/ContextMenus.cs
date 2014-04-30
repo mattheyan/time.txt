@@ -13,21 +13,11 @@ namespace TimeTxt.Exe
 		{
 			var menu = new ContextMenuStrip();
 
-			var appVersion = Assembly.GetEntryAssembly().GetName().Version;
-
-			var versionItem = menu.Items.Add(string.Format("{0} v{1}", Resources.AppTitle, appVersion));
-
-			// Don't enable clicking the version text.
-			versionItem.Enabled = false;
-
-			var sep = new ToolStripSeparator();
-			menu.Items.Add(sep);
-
-			var item = new ToolStripMenuItem();
-			item.Text = Resources.ContextMenuExit;
-			item.Click += exit_Click;
-			item.Image = Resources.ExitIcon;
-			menu.Items.Add(item);
+			var exitItem = new ToolStripMenuItem();
+			exitItem.Text = Resources.ContextMenuExit;
+			exitItem.Click += exit_Click;
+			exitItem.Image = Resources.ExitIcon;
+			menu.Items.Add(exitItem);
 
 			return menu;
 		}

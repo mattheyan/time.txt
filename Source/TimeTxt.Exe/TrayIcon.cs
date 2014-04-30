@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Windows.Forms;
 using TimeTxt.Exe.Properties;
 
@@ -20,9 +21,11 @@ namespace TimeTxt.Exe
 
 		public void Display()
 		{
+			var appVersion = Assembly.GetEntryAssembly().GetName().Version;
+
 			icon.MouseDoubleClick += icon_MouseDoubleClick;
 			icon.Icon = Resources.AppIcon;
-			icon.Text = Resources.AppTitle;
+			icon.Text = string.Format("{0} v{1}", Resources.AppTitle, appVersion);
 			icon.Visible = true;
 
 			var contextMenus = new ContextMenus();

@@ -16,9 +16,12 @@ namespace TimeTxt.Exe
 			icon = new NotifyIcon();
 		}
 
+		public MouseEventHandler DoubleClick;
+
 		public void Display()
 		{
 			icon.MouseClick += icon_MouseClick;
+			icon.MouseDoubleClick += icon_MouseDoubleClick;
 			icon.Icon = Resources.AppIcon;
 			icon.Text = Resources.AppTitle;
 			icon.Visible = true;
@@ -51,8 +54,18 @@ namespace TimeTxt.Exe
 
 		private void icon_MouseClick(object sender, MouseEventArgs e)
 		{
-			//if (e.Button == MouseButtons.Left)
-			//	Process.Start("explorer", null);
+			if (e.Button == MouseButtons.Left)
+				// Also show the context menu when left-clicked.
+				icon.ContextMenuStrip.Show();
+		}
+
+		private void icon_MouseDoubleClick(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Left)
+			{
+				if (DoubleClick != null)
+					DoubleClick(sender, e);
+			}
 		}
 
 		public void AddDependent(IDisposable disposable)

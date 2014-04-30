@@ -92,6 +92,9 @@ namespace TimeTxt.Exe
 
 					trayIcon.AddDependent(AutoUpdateFile(Settings.Default.TargetFile, logger));
 
+					// Launch target time.txt file when double-clicked: http://stackoverflow.com/a/9869764.
+					trayIcon.DoubleClick += (sender, args) => Process.Start(Settings.Default.TargetFile);
+
 					Application.Run();
 				}
 			}

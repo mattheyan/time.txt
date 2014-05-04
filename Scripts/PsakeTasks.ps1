@@ -90,7 +90,7 @@ task Package -depends BuildAll,Test {
 	$targetDir = Resolve-Path ..\.pack\tools
 	$binDir = Join-Path $targetDir "bin"
 	New-Item $binDir -Type Directory | Out-Null
-	robocopy (Resolve-Path ..\Source\Timetxt.Exe\bin\Debug) $binDir /xf *vshost* /MIR | Out-Null
+	robocopy (Resolve-Path ..\Source\Timetxt.Exe\bin\Release) $binDir /xf *vshost* /MIR | Out-Null
 
 	# Temporarily move to the pack directory and run the package command
 	Write-Host "Moving files for $PackageType package..."

@@ -80,6 +80,15 @@ namespace TimeTxt.Exe.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choose file....
+        /// </summary>
+        internal static string ContextMenuChooseFile {
+            get {
+                return ResourceManager.GetString("ContextMenuChooseFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exit.
         /// </summary>
         internal static string ContextMenuExit {
@@ -89,11 +98,49 @@ namespace TimeTxt.Exe.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon DebugAppIcon {
+            get {
+                object obj = ResourceManager.GetObject("DebugAppIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ExitIcon {
+        internal static System.Drawing.Bitmap ExitImage {
             get {
-                object obj = ResourceManager.GetObject("ExitIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("ExitImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Time.txt files.
+        /// </summary>
+        internal static string OpenFileDialogFilter {
+            get {
+                return ResourceManager.GetString("OpenFileDialogFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose a time.txt file....
+        /// </summary>
+        internal static string OpenFileDialogTitle {
+            get {
+                return ResourceManager.GetString("OpenFileDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap TxtFileImage {
+            get {
+                object obj = ResourceManager.GetObject("TxtFileImage", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

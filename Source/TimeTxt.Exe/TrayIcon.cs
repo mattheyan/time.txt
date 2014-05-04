@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Windows.Forms;
+using TimeTxt.Core;
 using TimeTxt.Exe.Properties;
 
 namespace TimeTxt.Exe
@@ -10,7 +11,6 @@ namespace TimeTxt.Exe
 	{
 		private readonly NotifyIcon icon;
 		private readonly IList<IDisposable> dependentDisposables = new List<IDisposable>();
-		private ITextLogger logger;
 
 		public TrayIcon()
 		{
@@ -19,24 +19,38 @@ namespace TimeTxt.Exe
 
 		public MouseEventHandler DoubleClick;
 
+		public event FileChangedEvent FileChanged;
+
 		public void Display()
 		{
 			var appVersion = Assembly.GetEntryAssembly().GetName().Version;
 
 			icon.MouseDoubleClick += icon_MouseDoubleClick;
+
+#if DEBUG
+			icon.Icon = Resources.DebugAppIcon;
+#else
 			icon.Icon = Resources.AppIcon;
+#endif
+
 			icon.Text = string.Format("{0} v{1}", Resources.AppTitle, appVersion);
 			icon.Visible = true;
 
 			var contextMenus = new ContextMenus();
-			contextMenus.UseLogger(logger);
 
 			icon.ContextMenuStrip = contextMenus.Create();
+
+			contextMenus.FileChanged += ContextMenu_FileChanged;
+		}
+
+		private void ContextMenu_FileChanged(object sender, FileChangedEventArgs args)
+		{
+			FileChanged(this, args);
 		}
 
 		public void Dispose()
 		{
-			logger.WriteLine("Disposing of application...");
+			Services.DefaultLogger.WriteLine("Disposing of application...");
 
 			// Attempt to dispose dependents.
 			foreach (var dependent in dependentDisposables)
@@ -47,7 +61,7 @@ namespace TimeTxt.Exe
 				}
 				catch (Exception e)
 				{
-					logger.WriteLine("ERROR: {0}", e.Message);
+					Services.DefaultLogger.WriteLine("ERROR: {0}", e.Message);
 				}
 			}
 
@@ -68,9 +82,42 @@ namespace TimeTxt.Exe
 			dependentDisposables.Add(disposable);
 		}
 
-		public void UseLogger(ITextLogger logger)
+		public bool RemoveDependent(IDisposable disposable)
 		{
-			this.logger = logger;
+			return dependentDisposables.Remove(disposable);
 		}
+
+		public void ShowMessageInTray(string title, string message)
+		{
+			icon.BalloonTipTitle = title;
+			icon.BalloonTipText = message;
+			icon.ShowBalloonTip(2000);
+		}
+
+		public void ShowMessage(string title, string message)
+		{
+			ShowMessageInTray(title, message);
+		}
+
+		public void ShowMessage(string title, string message, object arg0)
+		{
+			ShowMessageInTray(title, string.Format(message, arg0));
+		}
+
+		public void ShowMessage(string title, string message, object arg0, object arg1)
+		{
+			ShowMessageInTray(title, string.Format(message, arg0, arg1));
+		}
+
+		public void ShowMessage(string title, string message, object arg0, object arg1, object arg2)
+		{
+			ShowMessageInTray(title, string.Format(message, arg0, arg1, arg2));
+		}
+
+		public void ShowMessage(string title, string message, params object[] args)
+		{
+			ShowMessageInTray(title, string.Format(message, args));
+		}
+
 	}
 }

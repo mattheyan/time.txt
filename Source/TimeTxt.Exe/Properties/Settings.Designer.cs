@@ -26,12 +26,12 @@ namespace TimeTxt.Exe.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string TargetFile {
+        public string TimeTxtFile {
             get {
-                return ((string)(this["TargetFile"]));
+                return ((string)(this["TimeTxtFile"]));
             }
             set {
-                this["TargetFile"] = value;
+                this["TimeTxtFile"] = value;
             }
         }
     }

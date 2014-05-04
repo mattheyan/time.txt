@@ -1,26 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Text;
+using TimeTxt.Core;
 
 namespace TimeTxt.Exe
 {
-	public interface ITextLogger
-	{
-		void WriteLine();
-		void WriteLine(string message);
-		void WriteLine(string message, object arg0);
-		void WriteLine(string message, object arg0, object arg1);
-		void WriteLine(string message, object arg0, object arg1, object arg2);
-		void WriteLine(string message, params object[] args);
-	}
-
-	internal class Logger : ITextLogger
+	internal class LogFileWriter : ILogWriter
 	{
 		private static readonly object Mutex = new object();
 
 		private readonly string logFile;
 
-		public Logger(string logFile)
+		public LogFileWriter(string logFile)
 		{
 			if (!File.Exists(logFile))
 				throw new ArgumentException(string.Format("File '{0}' does not exist.", logFile));

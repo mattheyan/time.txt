@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="TimeTxt.Exe.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="TargetFile" Type="System.String" Scope="User">
+    <Setting Name="TimeTxtFile" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

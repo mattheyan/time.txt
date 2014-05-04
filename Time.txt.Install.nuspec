@@ -11,10 +11,11 @@
     <description>A formatted text file for tracking time. Inspired by time.txt.</description>
     <releaseNotes>
 
-Time.txt 2.1.3, 2014-04-29
+Time.txt 2.1.5, 2014-05-04
 ==========================
 - Start target time.txt file when icon is double-clicked.
 - Remove version context menu item since clicking it doesn't do anything - show version in icon title.
+- Remove automatic Dropbox file selecton and add "Choose file...", "Create file in My Documents", "Create file on Desktop", and "Create file in Dropbox" context menu option.
 
 Time.txt 2.0.1, 2014-04-14
 ==========================

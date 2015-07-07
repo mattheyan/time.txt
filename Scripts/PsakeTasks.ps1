@@ -76,32 +76,44 @@ task Deploy -depends BuildAll,Test {
 ###############
 
 task Package -depends BuildAll,Test {
-	if (Test-Path ..\.pack) {
+	$tempFile = [System.IO.Path]::GetTempFileName()
+	$packageDir = $tempFile.Substring(0, $tempFile.Length - 4)
+
+	Write-Host "Packaging in '$($packageDir)'..."
+	
+	if (Test-Path $packageDir) {
 		Write-Host "Deleting existing artifacts..."
-		Remove-Item ..\.pack -Recurse -Force | Out-Null
-		Remove-Item ..\.pack -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
+		Remove-Item $packageDir -Recurse -Force | Out-Null
+		Remove-Item $packageDir -Recurse -Force -ErrorAction SilentlyContinue | Out-Null
 	}
 
 	# Create .pack folders
-	New-Item ..\.pack\tools -Type Directory -Force | Out-Null
+	New-Item $packageDir\tools -Type Directory -Force | Out-Null
 
 	# Copy the application binaries into the pack directory
 	Write-Host "Copying binaries to the pack directory..."
-	$targetDir = Resolve-Path ..\.pack\tools
+	$targetDir = Resolve-Path $packageDir\tools
 	$binDir = Join-Path $targetDir "bin"
 	New-Item $binDir -Type Directory | Out-Null
 	robocopy (Resolve-Path ..\Source\Timetxt.Exe\bin\Release) $binDir /xf *vshost* /MIR | Out-Null
 
 	# Temporarily move to the pack directory and run the package command
 	Write-Host "Moving files for $PackageType package..."
-	Copy-Item ..\Time.txt.Install.nuspec ..\.pack | Out-Null
+	Copy-Item ..\Time.txt.Install.nuspec $packageDir | Out-Null
 	Write-Host "Copying installer script..."
-	Copy-Item ..\chocolateyInstall.ps1 ..\.pack\tools\chocolateyInstall.ps1 | Out-Null
+	Copy-Item ..\chocolateyInstall.ps1 $packageDir\tools\chocolateyInstall.ps1 | Out-Null
 	Write-Host "Copying uninstaller script..."
-	Copy-Item ..\chocolateyUninstall.ps1 ..\.pack\tools\chocolateyUninstall.ps1 | Out-Null
+	Copy-Item ..\chocolateyUninstall.ps1 $packageDir\tools\chocolateyUninstall.ps1 | Out-Null
+
+	# Take from 'Test-Admin' from Boxstarter...
+	$identity  = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+	$principal = New-Object System.Security.Principal.WindowsPrincipal( $identity )
+	if (!($principal.IsInRole( [System.Security.Principal.WindowsBuiltInRole]::Administrator ))) {
+		throw "Command `choco pack` must be run as administrator."
+	}
 
 	Write-Host "Packing..."
-	Push-Location ..\.pack
+	Push-Location $packageDir
 	try {
 		cpack
 	}
@@ -110,7 +122,7 @@ task Package -depends BuildAll,Test {
 	}
 
 	# Copy the resulting package into the root directory
-	Move-Item ..\.pack\*.nupkg ..\ -Force | Out-Null
+	Move-Item $packageDir\*.nupkg ..\ -Force | Out-Null
 }
 
 # Common helper functions

@@ -1,2 +1,2 @@
-powershell -Command "& {Import-Module .\Tools\PSake\psake.psm1; Invoke-psake .\Scripts\PsakeTasks.ps1 Test}"
+powershell -Command "& {Import-Module %~dp0\Tools\PSake\psake.psm1; Invoke-psake %~dp0\Scripts\PsakeTasks.ps1 Test}"
 pause

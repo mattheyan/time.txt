@@ -11,7 +11,7 @@ namespace TimeTxt.Exe
 	{
 		private static ILogWriter CreateLogWriter()
 		{
-			var userDataDir = Path.Combine(Path.Combine(@"C:\Users", Environment.UserName), @"AppData\Local\Time.txt");
+			var userDataDir = Path.Combine(Path.Combine(@"C:\Users", Environment.UserName), string.Format(@"AppData\Roaming\{0}", Resources.AppFolderName));
 			if (!Directory.Exists(userDataDir))
 				Directory.CreateDirectory(userDataDir);
 

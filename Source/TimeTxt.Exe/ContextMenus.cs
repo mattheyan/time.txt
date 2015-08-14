@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Resources;
 using System.Windows.Forms;
 using TimeTxt.Core;
 using TimeTxt.Exe.Properties;
@@ -90,7 +91,12 @@ namespace TimeTxt.Exe
 				}
 			}
 
-			openFileDialog.Filter = Resources.OpenFileDialogFilter + @"|time.txt";
+			openFileDialog.Filter = string.Join("|", new[]
+			{
+				Resources.OpenFileDialogTimeTxtFilter + @"|time.txt",
+				Resources.OpenFileDialogDotTimeFilter + @"|*.time"
+			});
+
 			openFileDialog.Multiselect = false;
 
 			if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -115,5 +121,4 @@ namespace TimeTxt.Exe
 			FilePath = filePath;
 		}
 	}
-
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using TimeTxt.Core;
+using TimeTxt.Exe.Properties;
 
 namespace TimeTxt.Exe
 {
@@ -117,7 +118,7 @@ namespace TimeTxt.Exe
 					return false;
 				}
 
-				var txtFilePath = Path.Combine(folderPath, "time.txt");
+				var txtFilePath = Path.Combine(folderPath, Resources.DefaultTextFileName);
 				if (!File.Exists(txtFilePath))
 				{
 					filePath = null;
@@ -143,7 +144,7 @@ namespace TimeTxt.Exe
 
 			bool IFileSearcher.TryGetFile(out string filePath)
 			{
-				Services.DefaultLogger.WriteLine("Searching for time.txt {0}...", friendlyLocationDescription);
+				Services.DefaultLogger.WriteLine("Searching for {0} {1}...", Resources.DefaultTextFileName, friendlyLocationDescription);
 				if (!TryGetFile(out filePath))
 				{
 					Services.DefaultLogger.WriteLine("File not found.");
@@ -178,7 +179,7 @@ namespace TimeTxt.Exe
 					folderPath = CreateFolder();
 				}
 
-				filePath = Path.Combine(folderPath, "time.txt");
+				filePath = Path.Combine(folderPath, Resources.DefaultTextFileName);
 				using (var stream = File.CreateText(filePath))
 				{
 					stream.Flush();
@@ -196,7 +197,7 @@ namespace TimeTxt.Exe
 
 			protected override bool TryGetFolder(out string folderPath)
 			{
-				return TryGetSubFolder(@"Dropbox\Apps\time.txt", out folderPath);
+				return TryGetSubFolder(string.Format(@"Dropbox\Apps\{0}", Resources.AppFolderName), out folderPath);
 			}
 		}
 
@@ -222,7 +223,7 @@ namespace TimeTxt.Exe
 
 			protected override bool TryGetFolder(out string folderPath)
 			{
-				return TryGetSubFolder(@"AppData\Local\time.txt", out folderPath);
+				return TryGetSubFolder(string.Format(@"AppData\Roaming\{0}", Resources.AppFolderName), out folderPath);
 			}
 		}
 

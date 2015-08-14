@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using TimeTxt.Core;
+using TimeTxt.Exe.Properties;
 
 namespace TimeTxt.Exe
 {
@@ -29,7 +30,10 @@ namespace TimeTxt.Exe
 				}
 			}
 
-			throw lastException;
+			if (lastException != null)
+				throw lastException;
+
+			throw new Exception("Retry operation failed unexpectedly.");
 		}
 
 		static FileStream OpenWrite(string fileName)
@@ -46,7 +50,7 @@ namespace TimeTxt.Exe
 		{
 			try
 			{
-				var userDataDir = Path.Combine(Path.Combine(@"C:\Users", Environment.UserName), @"AppData\Local\Time.txt");
+				var userDataDir = Path.Combine(Path.Combine(@"C:\Users", Environment.UserName), string.Format(@"AppData\Roaming\{0}", Resources.AppFolderName));
 
 				var backupsDir = Path.Combine(userDataDir, "Backups");
 				if (!Directory.Exists(backupsDir))

@@ -141,7 +141,7 @@ namespace TimeTxt.Exe
 			var watcher = new FileSystemWatcher(directoryName);
 
 			watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName;
-			watcher.Filter = "*.txt";
+			watcher.Filter = "*" + Path.GetExtension(file);
 
 			DateTime? lastUpdatedTime = null;
 

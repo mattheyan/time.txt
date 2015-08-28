@@ -19,14 +19,14 @@ set nowrap
 
 syn match lineComment "^#.*$"
 syn match taskDuration "(\(1|2\)\?\d:[012345]\d)"
-syn match projectName " \[[^\s\]]\+\] "
-syn match cardNumberRef "\s#\d\+\s"
-syn match personRef "\s@[A-Z][a-z']\+\($\|[^A-Za-z']\@=\)"
+syn match projectName "\s\@<=\[[^\s\]]\+\]\s\@="
+syn match cardNumberRef "\s\@<=#\d\+\s\@="
+syn match personRef "[\s\(]\@<=@[A-Z][a-z']\+\($\|[^A-Za-z']\@=\)"
 
-syn match timeLabelFeature " Feature\-[A-Za-z0-9]\+:"
-syn match timeLabelMaintenance " Maint\-[A-Za-z0-9]\+:"
-syn match timeLabelSupport " Support\-[^:]\+:"
-syn match timeLabelTool " Tool\-[A-Za-z0-9]\+:"
+syn match timeLabelFeature "\s\@<=Feature\-[A-Za-z0-9]\+:"
+syn match timeLabelMaintenance "\s\@<=Maint\-[A-Za-z0-9]\+:"
+syn match timeLabelSupport "\s\@<=Support\-[^:]\+:"
+syn match timeLabelTool "\s\@<=Tool\-[A-Za-z0-9]\+:"
 
 hi def styleAlert guifg=firebrick
 hi def styleAlertSubdued guifg=OrangeRed

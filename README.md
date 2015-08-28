@@ -79,20 +79,13 @@ Syntax highlighting is supported in two editors currently: Notepad++ and Vim.
 Due to differences in the editors the syntax will look a little different, but
 this is approximately what it should look like in each.
 
-<pre>
-Monday, July 21, 2014
-=====================
-<font style='font-weight:bold;font-style:italic;color:#7CA600'>(0:24)</font>  8:11a,  8:35a,  Catch up on email
-<font style='font-weight:bold;font-style:italic;color:#7CA600'>(0:10)</font>  8:50a,  9a,     <font style='color:red;font-weight:bold;'>Support-Corporate:</font> <font style='color:darkgray;font-style:italic'>[CorpWeb]</font> Investigate login problems.
-<font style='font-weight:bold;font-style:italic;color:#7CA600'>(2:52)</font>  9a,     11:52a, Weekly team meeting
-<font style='font-weight:bold;font-style:italic;color:#7CA600'>(0:35)</font>  1:04p,  1:39p,  <font style='color:darkorange;font-weight:bold;'>Maint-Auth:</font> <font style='color:darkgray;font-style:italic'>[CorpWeb]</font> <font style='color:goldenrod;font-weight:bold;font-style:italic;'>#459</font> - Fix login problem in browser X.
-<font style='font-weight:bold;font-style:italic;color:#7CA600'>(0:06)</font>  1:39p,  1:45p,  <font style='color:darkgreen;font-weight:bold;'>Feature-UserPrefs</font>: Start work on initial prototype.
-<font style='font-weight:bold;font-style:italic;color:#7CA600'>(1:07)</font>  2:02p,  3:09p,  Training for new team member (<font style='color:darkblue;font-weight:bold;'>@Bob</font>).
+Vim (gVim using the 'wombat' color scheme):
 
-Day: 5:14
+![Screenshot in Vim](https://raw.github.com/mattheyan/time.txt/master/syntax-vim.png)
 
-Week: 5:14
-</pre>
+Notepad++:
+
+![Screenshot in Notepad++](https://raw.github.com/mattheyan/time.txt/master/syntax-npp.png)
 
 The following are highlighted currently:
 

@@ -87,6 +87,8 @@ Notepad++:
 
 ![Screenshot in Notepad++](https://raw.github.com/mattheyan/time.txt/master/syntax-npp.PNG)
 
+NOTE: Because Notepad++'s user-defined languages are not programmable, not all features work 100% of the time (see "@Bob" above).
+
 The following are highlighted currently:
 
 * Per-day duration at the beginning of each line.

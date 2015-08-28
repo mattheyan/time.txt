@@ -85,7 +85,7 @@ Vim (gVim using the 'wombat' color scheme):
 
 Notepad++:
 
-![Screenshot in Notepad++](https://raw.github.com/mattheyan/time.txt/master/syntax-npp.png)
+![Screenshot in Notepad++](https://raw.github.com/mattheyan/time.txt/master/syntax-npp.PNG)
 
 The following are highlighted currently:
 

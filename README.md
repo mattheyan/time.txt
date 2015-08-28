@@ -120,8 +120,6 @@ You can find the syntax files in the 'Editors' folder.
 Roadmap
 -------
 
-### Reporting
-
 * Every week I have to take the time that I've recorded and enter it into an
 internal system. I'd like to implement a reporting tool to automate this somewhat.
 * I would like to have other ways to interact with my time file, e.g. a CLI, and possibly even a web interface for things like reporting.

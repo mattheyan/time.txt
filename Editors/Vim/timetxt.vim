@@ -27,8 +27,10 @@ syn match timeLabelFeature "\s\@<=Feature\-[A-Za-z0-9]\+:"
 syn match timeLabelMaintenance "\s\@<=Maint\-[A-Za-z0-9]\+:"
 syn match timeLabelSupport "\s\@<=Support\-[^:]\+:"
 syn match timeLabelTool "\s\@<=Tool\-[A-Za-z0-9]\+:"
+syn match timeLabelMeeting "\s\@<=Meeting\-[A-Za-z0-9]\+:"
 
 hi def styleAlert guifg=firebrick
+hi def styleAvoid guifg=SaddleBrown
 hi def styleAlertSubdued guifg=OrangeRed
 hi def styleOkHeavy guifg=green4
 hi def styleOkAttention guifg=MediumPurple
@@ -48,5 +50,6 @@ hi def link personRef		    	styleOkSubduedHeavy
 
 hi def link timeLabelFeature		styleOkHeavy
 hi def link timeLabelMaintenance	styleAlertSubdued
+hi def link timeLabelMeeting		styleAvoid
 hi def link timeLabelSupport	    styleAlert
 hi def link timeLabelTool		    styleOkAttention

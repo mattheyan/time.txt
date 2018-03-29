@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TimeTxt.Core", "TimeTxt.Core\TimeTxt.Core.csproj", "{3EA3A6EB-4E8C-416C-84BE-CD5DEC5A619E}"
 EndProject
@@ -35,7 +35,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{134BA8F2-9D6E-4090-81FA-8FE07D6F98B7}"
 	ProjectSection(SolutionItems) = preProject
 		..\README.md = ..\README.md
-		..\todo.txt = ..\todo.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Git", "Git", "{A6447336-E1B8-4F09-91EB-F375CFF46445}"
@@ -76,5 +75,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0900F559-E2E6-4464-B49F-F4E96A9FD6FB} = {635D8DC6-46F1-4C50-B24B-4B04ECC9CDE8}
 		{8659A1CB-C818-4AC6-AA79-7FF2C1094C5F} = {635D8DC6-46F1-4C50-B24B-4B04ECC9CDE8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D74839C3-4D66-4B0E-AC4A-E01D3A388D62}
 	EndGlobalSection
 EndGlobal

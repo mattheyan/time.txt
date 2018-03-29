@@ -1,2 +1,0 @@
-x Test for noon represented as "0p"
-x Test for duration prepended to each entry

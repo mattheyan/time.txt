@@ -16,11 +16,17 @@ namespace TimeTxt.Exe
 				Directory.CreateDirectory(userDataDir);
 
 			var logFileCreated = false;
-			var logFile = Path.Combine(userDataDir, "log.txt");
+			var logFile = Path.Combine(userDataDir, "log-" + DateTime.Now.ToFileTime().ToString() + ".txt");
 
 			if (!File.Exists(logFile))
 			{
-				File.Create(logFile);
+				// https://stackoverflow.com/a/4680341
+				// File.Create returns a FileStream. You should use it like this:
+				using (FileStream fs = File.Create(logFile))
+				{
+					// Do nothing
+				}
+
 				logFileCreated = true;
 			}
 

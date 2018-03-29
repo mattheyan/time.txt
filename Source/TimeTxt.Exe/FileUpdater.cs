@@ -56,7 +56,7 @@ namespace TimeTxt.Exe
 				if (!Directory.Exists(backupsDir))
 					Directory.CreateDirectory(backupsDir);
 
-				var backupFilePath = Path.Combine(backupsDir, DateTime.Now.ToString("yyyyMMdd_hhmmss") + ".backup.txt");
+				var backupFilePath = Path.Combine(backupsDir, Path.GetFileNameWithoutExtension(file) + "-" + DateTime.Now.ToFileTime() + Path.GetExtension(file));
 				Services.DefaultLogger.WriteLine("Backing up file '{0}' to '{1}'...", file, backupFilePath);
 				File.Copy(file, backupFilePath);
 
@@ -81,6 +81,8 @@ namespace TimeTxt.Exe
 						else
 						{
 							successful = false;
+							var writer = new StreamWriter(buffer);
+							writer.Write("# -> ERROR: ");
 							processor.WriteRecoveredData(buffer, currentLine, fileInputStream);
 						}
 					}

@@ -127,7 +127,6 @@ namespace TimeTxt.Core
 							if (!gracefulRecovery)
 								throw;
 
-							WriteToStream("# -> ERROR: " + e.Message, writer);
 							WriteToStream(line, writer);
 							return true;
 						}
@@ -136,6 +135,7 @@ namespace TimeTxt.Core
 						if (!gracefulRecovery)
 							throw new UpdateException(line, dayInEffect);
 
+						WriteToStream("# -> ERROR: " + line, writer);
 						currentLine = line;
 						return false;
 					}

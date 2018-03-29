@@ -5,3 +5,8 @@
 *.csproj.bak
 bin/
 obj/
+Source/TimeTxt.PowerShell/
+*.nupkg
+.vs/
+packages/
+*.bak

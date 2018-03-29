@@ -6,8 +6,8 @@ using Xunit;
 
 namespace TimeTxt.ApprovalTests
 {
-	[UseReporter(typeof(WinMergeReporter))]
-	//[UseReporter(typeof(DiffReporter))]
+	//[UseReporter(typeof(WinMergeReporter))]
+	[UseReporter(typeof(DiffReporter))]
 	public class StreamFact
 	{
 		public class WhenTheInputIsBlank : StreamFact

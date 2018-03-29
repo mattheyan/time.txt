@@ -93,7 +93,7 @@ namespace TimeTxt.Exe
 
 			openFileDialog.Filter = string.Join("|", new[]
 			{
-				Resources.OpenFileDialogTimeTxtFilter + @"|time.txt",
+				Resources.OpenFileDialogTxtFilter + @"|*.txt",
 				Resources.OpenFileDialogDotTimeFilter + @"|*.time"
 			});
 

@@ -145,8 +145,8 @@
   <data name="OpenFileDialogDotTimeFilter" xml:space="preserve">
     <value>Time files</value>
   </data>
-  <data name="OpenFileDialogTimeTxtFilter" xml:space="preserve">
-    <value>Time TXT files</value>
+  <data name="OpenFileDialogTxtFilter" xml:space="preserve">
+    <value>Text files</value>
   </data>
   <data name="AppFolderName" xml:space="preserve">
     <value>Time.txt</value>

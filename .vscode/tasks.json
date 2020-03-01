@@ -1,0 +1,49 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise\\MSBuild\\Current\\Bin\\msbuild",
+            "args": [
+                "/property:GenerateFullPaths=true",
+                "/t:build",
+                "/consoleloggerparameters:NoSummary",
+                "${workspaceFolder}\\Source\\TimeTxt.sln"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "xunit (TimeTxt.Facts)",
+            "type": "shell",
+            "dependsOn": "build",
+            "command": "${workspaceFolder}\\Source\\packages\\xunit.runners.1.9.1\\tools\\xunit.console.exe",
+            "args": [
+                "${workspaceFolder}\\Source\\TimeTxt.Facts\\bin\\Debug\\TimeTxt.Facts.dll"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "xunit (TimeTxt.ApprovalTests)",
+            "type": "shell",
+            "dependsOn": "build",
+            "command": "${workspaceFolder}\\Source\\packages\\xunit.runners.1.9.1\\tools\\xunit.console.exe",
+            "args": [
+                "${workspaceFolder}\\Source\\TimeTxt.ApprovalTests\\bin\\Debug\\TimeTxt.ApprovalTests.dll"
+            ],
+            "group": "test"
+        }
+    ]
+}

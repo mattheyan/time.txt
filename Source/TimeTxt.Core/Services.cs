@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Practices.ServiceLocation;
+using CommonServiceLocator;
 
 namespace TimeTxt.Core
 {
@@ -9,7 +9,7 @@ namespace TimeTxt.Core
 	{
 		public static readonly IConfigurableServiceLocator Locator = new DictionaryServiceLocator();
 
-		public static ILogWriter DefaultLogger 
+		public static ILogWriter DefaultLogger
 		{
 			get { return Locator.GetInstance<ILogWriter>(); }
 		}

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Text;
 
 namespace TimeTxt.Core
@@ -8,29 +7,41 @@ namespace TimeTxt.Core
 	{
 		public DateTime Start { get; internal set; }
 		public DateTime? End { get; internal set; }
+		public TimeSpan? Duration { get; internal set; }
 		public string Notes { get; internal set; }
 
 		public override string ToString()
 		{
-			return ToString(false);
+			return ToString(null);
 		}
 
 		public string ToString(bool prependDuration)
+		{
+			if (prependDuration)
+				return ToString(DurationFormat.TimeSpan);
+
+			return ToString(null);
+		}
+
+		public string ToString(DurationFormat? durationFormat)
 		{
 			var builder = new StringBuilder();
 
 			var targetLength = 0;
 
-			if (prependDuration)
+			if (durationFormat.HasValue)
 			{
 				// (##:##)
 				targetLength += 7;
-
-				if (End.HasValue)
+				TimeSpan? duration = null;
+				if (Duration.HasValue)
+					duration = Duration.Value;
+				else if (End.HasValue)
+					duration = End.Value - Start;
+				if (duration.HasValue)
 				{
-					var duration = End.Value - Start;
 					builder.Append("(");
-					builder.Append(duration.ToString("h\\:mm", CultureInfo.InvariantCulture));
+					builder.Append(TimeFormatter.GetDurationString(duration.Value, durationFormat.Value));
 					builder.Append(")");
 
 					while (builder.Length < targetLength)
@@ -132,4 +143,11 @@ namespace TimeTxt.Core
 			return builder.ToString();
 		}
 	}
+
+	public enum DurationFormat
+	{
+		TimeSpan,
+		Decimal
+	}
 }
+

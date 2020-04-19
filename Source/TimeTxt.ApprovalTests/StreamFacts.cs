@@ -206,6 +206,7 @@ namespace TimeTxt.ApprovalTests
 			public void ExistingDurationIsIgnoredEvenIfIncorrect()
 			{
 				Approvals.Verify(Update(@"
+					#! ignoreExistingDurations=True
 
 					5/1/2012
 					(0:05) 3, 4:10

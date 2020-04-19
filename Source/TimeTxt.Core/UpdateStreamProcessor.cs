@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TimeTxt.Core
 {
@@ -13,6 +14,8 @@ namespace TimeTxt.Core
 
 		private static readonly string[] defaultMonthDayFormats = new[] { "M/d", "MM/dd", "M/dd", "MM/d" };
 
+		private static readonly Regex PragmaRegex = new Regex("^#\\!\\s*(?<name>[A-Za-z][A-Za-z0-9_]*)=(?<value>.*)$");
+
 		private string dateTimeFormat;
 
 		private int? earliestStart;
@@ -21,17 +24,29 @@ namespace TimeTxt.Core
 
 		private TimeSpan? lastStart;
 
+		private TimeSpan? lastEnd;
+
 		private bool dayInEffect;
 
 		private List<TimeSpan> daySpans;
 
 		private List<TimeSpan> weekSpans;
 
-		private List<Func<string, StreamWriter, bool>> lineProcessors;
+		private List<Func<string, bool, StreamWriter, bool>> lineProcessors;
 
 		private List<string> acceptableDateFormatsList;
 
 		private string[] acceptableDateFormats;
+
+		private DurationFormat durationFormat;
+
+		private bool preserveBlankLines;
+
+		private bool ignoreExistingDurations;
+
+		private List<object> pendingEntries = new List<object>();
+
+		private string lastLineWritten;
 
 		public UpdateStreamProcessor()
 		{
@@ -61,8 +76,10 @@ namespace TimeTxt.Core
 
 		private void InitLineProcessors()
 		{
-			lineProcessors = new List<Func<string, StreamWriter, bool>>
+			lineProcessors = new List<Func<string, bool, StreamWriter, bool>>
 				{
+					ProcessPragma,
+					ProcessExclusion,
 					ProcessComment,
 					ProcessDateUnderline,
 					ProcessDate,
@@ -101,53 +118,76 @@ namespace TimeTxt.Core
 			var reader = new StreamReader(inputStream);
 			var writer = new StreamWriter(outputStream);
 
-			string line = null;
+			string rawLine = null;
+			var lastLineWasBlank = true;
+			lastLineWritten = null;
 
 			try
 			{
-				while ((line = reader.ReadLine()) != null)
+				while ((rawLine = reader.ReadLine()) != null)
 				{
 					// Remote whitespace from beginning and end of line
-					line = line.Trim();
+					var line = rawLine.Trim();
 
 					if (string.IsNullOrEmpty(line))
-						continue;
-
-					//WriteDebug(line);
-
-					// Look for the first line processor to use the line.
-					if (!lineProcessors.Any(p =>
 					{
-						try
+						if (preserveBlankLines)
 						{
-							return p(line, writer);
+							if (pendingEntries.Count > 0)
+							{
+								pendingEntries.Add("");
+							}
+							else
+							{
+								lastLineWasBlank = true;
+								WriteToStream("", writer);
+							}
 						}
-						catch (Exception e)
+					}
+					else
+					{
+						//WriteDebug(line);
+
+						if (!lineProcessors.Any(p =>
+						{
+							try
+							{
+								string previousLastLineWritten = lastLineWritten;
+								bool result = p(line, lastLineWasBlank, writer);
+								if (lastLineWritten != previousLastLineWritten)
+									lastLineWasBlank = string.IsNullOrEmpty(lastLineWritten);
+								return result;
+							}
+							catch (Exception)
+							{
+								if (!gracefulRecovery)
+									throw;
+
+								WriteToStream(line, writer);
+								return true;
+							}
+						}))
 						{
 							if (!gracefulRecovery)
-								throw;
+								throw new UpdateException(line, dayInEffect);
 
-							WriteToStream(line, writer);
-							return true;
+							WriteToStream("# -> ERROR: " + line, writer);
+							currentLine = line;
+							return false;
 						}
-					}))
-					{
-						if (!gracefulRecovery)
-							throw new UpdateException(line, dayInEffect);
-
-						WriteToStream("# -> ERROR: " + line, writer);
-						currentLine = line;
-						return false;
 					}
 				}
 			}
 			catch (Exception e)
 			{
-				throw new UpdateException(line, dayInEffect, e);
+				throw new UpdateException(rawLine, dayInEffect, e);
 			}
 
-			FinalizeDay(writer);
-			FinalizeWeek(writer);
+			if (FinalizeDay(lastLineWasBlank, writer))
+				lastLineWasBlank = false;
+
+			if (FinalizeWeek(lastLineWasBlank, writer))
+				lastLineWasBlank = false;
 
 			//WriteDebug("=================\r\nFinished processing.");
 
@@ -197,6 +237,7 @@ namespace TimeTxt.Core
 
 			writer.WriteLine(text);
 			writer.Flush();
+			lastLineWritten = text;
 		}
 
 		//private void WriteDebug(string text)
@@ -215,185 +256,393 @@ namespace TimeTxt.Core
 		//	}
 		//}
 
-		private void FinalizeWeek(StreamWriter writer)
+		private bool FinalizeWeek(bool lastLineWasBlank, StreamWriter writer)
 		{
 			//WriteDebug("\tFinalizing week...");
 
 			if (weekSpans == null)
-				return;
-
-			//WriteDebug("\tWriting empty line before week total.");
-			WriteToStream("", writer);
-
-			if (weekSpans.Any())
-			{
-				var totalWeekSpan = weekSpans.Aggregate((l, r) => l + r);
-				var sum = Math.Floor(totalWeekSpan.TotalHours).ToString("0") + ":" + totalWeekSpan.Minutes.ToString("00");
-
-				//WriteDebug("\tWriting week value: " + sum + ".");
-				WriteToStream("Week: " + sum, writer);
-			}
-			else
-			{
-				//WriteDebug("\tNo time to write for the week.");
-				WriteToStream("Week: 0:00", writer);
-			}
-		}
-
-		private bool FinalizeDay(StreamWriter writer)
-		{
-			//WriteDebug("\tFinalizing day...");
-
-			if (daySpans == null)
 				return false;
 
-			//WriteDebug("\tWriting empty line before day total.");
-			WriteToStream("", writer);
-
-			if (daySpans.Any())
+			if (!lastLineWasBlank)
 			{
-				var totalDaySpan = daySpans.Aggregate((l, r) => l + r);
-				var sum = totalDaySpan.ToString("h\\:mm", CultureInfo.InvariantCulture);
-
-				//WriteDebug("\tWriting day value: " + sum + ".");
-				WriteToStream("Day: " + sum, writer);
-			}
-			else
-			{
-				//WriteDebug("\tNo time to write for the day.");
-				WriteToStream("Day: 0:00", writer);
+				//WriteDebug("\tWriting empty line before week total.");
+				WriteToStream("", writer);
 			}
 
+			var totalWeekSpan = (!weekSpans.Any()) ? TimeSpan.Zero : weekSpans.Aggregate((TimeSpan l, TimeSpan r) => l + r);
+			var sum = TimeFormatter.GetDurationString(totalWeekSpan, durationFormat);
+			WriteToStream("Week: " + sum, writer);
+			return true;
+		}
+
+		private bool FinalizeDay(bool lastLineWasBlank, StreamWriter writer)
+		{
+			if (FinalizePendingEntries(null, writer, out string lastFinalizedLine))
+			{
+				lastLineWasBlank = string.IsNullOrEmpty(lastFinalizedLine);
+			}
+			else if (daySpans == null)
+			{
+				return false;
+			}
+			if (pendingEntries.Count > 0)
+			{
+				throw new InvalidOperationException("Didn't clear up all pending entries.");
+			}
+			if (!lastLineWasBlank)
+			{
+				WriteToStream("", writer);
+			}
+			TimeSpan totalDaySpan = (!daySpans.Any()) ? TimeSpan.Zero : daySpans.Aggregate((TimeSpan l, TimeSpan r) => l + r);
+			string sum = TimeFormatter.GetDurationString(totalDaySpan, durationFormat);
+			WriteToStream("Day: " + sum, writer);
 			dayInEffect = false;
 			currentDay = null;
 			daySpans = null;
 			lastStart = null;
+			lastEnd = null;
 			return true;
 		}
 
-		private bool ProcessComment(string line, StreamWriter writer)
+		private bool FinalizePendingEntries(DateTime? untilTime, StreamWriter writer, out string lastLine)
 		{
-			if (!line.StartsWith("#"))
-				return false;
+			int processedCount = 0;
+			lastLine = null;
+			for (int i = 0; i < pendingEntries.Count; i++)
+			{
+				object entry = pendingEntries[i];
+				bool shouldFinalize;
+				if (!untilTime.HasValue)
+				{
+					shouldFinalize = true;
+				}
+				else if (entry is ParsedEntry)
+				{
+					ParsedEntry parsed = (ParsedEntry)entry;
+					shouldFinalize = ((parsed.End.HasValue && parsed.End.Value.TimeOfDay <= untilTime.Value.TimeOfDay) ? true : false);
+				}
+				else if (entry is Tuple<string, DateTime, DateTime?>)
+				{
+					shouldFinalize = ((i == 0) ? true : false);
+				}
+				else
+				{
+					if (!(entry is string))
+					{
+						throw new Exception(string.Format("Found pending entry of unexpected type {0}.", (entry == null) ? "<NULL>" : ("'" + entry.GetType().FullName + "'")));
+					}
+					shouldFinalize = ((i == 0) ? true : false);
+				}
+				if (!shouldFinalize)
+				{
+					break;
+				}
+				if (entry is ParsedEntry)
+				{
+					ParsedEntry parsed2 = (ParsedEntry)entry;
+					if (parsed2.End.HasValue && !parsed2.Duration.HasValue)
+					{
+						parsed2.Duration = GetActualDuration(parsed2.Start, parsed2.End.Value, pendingEntries.Skip(1));
+					}
+					string entryLine = parsed2.ToString(durationFormat);
+					WriteToStream(entryLine, writer);
+					lastLine = entryLine;
+					if (parsed2.Duration.HasValue)
+					{
+						daySpans.Add(parsed2.Duration.Value);
+						weekSpans.Add(parsed2.Duration.Value);
+					}
+				}
+				else if (entry is Tuple<string, DateTime, DateTime?>)
+				{
+					Tuple<string, DateTime, DateTime?> exclusion = (Tuple<string, DateTime, DateTime?>)entry;
+					WriteToStream(exclusion.Item1, writer);
+					lastLine = exclusion.Item1;
+				}
+				else
+				{
+					if (!(entry is string))
+					{
+						throw new Exception(string.Format("Found pending entry of unexpected type {0}.", (entry == null) ? "<NULL>" : ("'" + entry.GetType().FullName + "'")));
+					}
+					string rawLine = (string)entry;
+					WriteToStream(rawLine, writer);
+					lastLine = rawLine;
+				}
+				processedCount++;
+				pendingEntries.RemoveAt(i--);
+			}
+			return processedCount > 0;
+		}
 
+		private TimeSpan GetActualDuration(DateTime start, DateTime end, IEnumerable<object> followingEntries)
+		{
+			TimeSpan duration = end - start;
+			List<Tuple<DateTime, DateTime>> exclusions = new List<Tuple<DateTime, DateTime>>();
+			DateTime? currentExclusionStart = null;
+			DateTime? currentExclusionEnd = null;
+			foreach (object following in followingEntries)
+			{
+				Tuple<DateTime, DateTime> potentialExclusion = null;
+				if (following is ParsedEntry)
+				{
+					ParsedEntry followingEntry = (ParsedEntry)following;
+					if (followingEntry.End.HasValue)
+					{
+						potentialExclusion = new Tuple<DateTime, DateTime>(followingEntry.Start, followingEntry.End.Value);
+					}
+				}
+				else if (following is Tuple<string, DateTime, DateTime?>)
+				{
+					Tuple<string, DateTime, DateTime?> exclusionLine = (Tuple<string, DateTime, DateTime?>)following;
+					if (exclusionLine.Item3.HasValue)
+					{
+						potentialExclusion = new Tuple<DateTime, DateTime>(exclusionLine.Item2, exclusionLine.Item3.Value);
+					}
+				}
+				if (potentialExclusion != null && potentialExclusion.Item1 >= start && potentialExclusion.Item1 < end)
+				{
+					if (currentExclusionStart.HasValue && currentExclusionEnd.HasValue)
+					{
+						exclusions.Add(new Tuple<DateTime, DateTime>(currentExclusionStart.Value, currentExclusionEnd.Value));
+						currentExclusionStart = null;
+						currentExclusionEnd = null;
+					}
+					if (!currentExclusionStart.HasValue || potentialExclusion.Item1 < currentExclusionStart.Value)
+					{
+						currentExclusionStart = potentialExclusion.Item1;
+					}
+					if (!currentExclusionEnd.HasValue || potentialExclusion.Item2 < currentExclusionEnd.Value)
+					{
+						currentExclusionEnd = ((!(potentialExclusion.Item2 >= end)) ? new DateTime?(potentialExclusion.Item2) : new DateTime?(end));
+					}
+				}
+			}
+			if (currentExclusionStart.HasValue && currentExclusionEnd.HasValue)
+			{
+				exclusions.Add(new Tuple<DateTime, DateTime>(currentExclusionStart.Value, currentExclusionEnd.Value));
+			}
+			foreach (Tuple<DateTime, DateTime> exclusion in exclusions)
+			{
+				duration -= exclusion.Item2 - exclusion.Item1;
+			}
+			return duration;
+		}
+
+		private bool ProcessPragma(string line, bool lastLineWasBlank, StreamWriter writer)
+		{
+			if (!line.StartsWith("#!"))
+			{
+				return false;
+			}
+			Match pragmaMatch = PragmaRegex.Match(line);
+			if (pragmaMatch.Success)
+			{
+				string pragmaName = pragmaMatch.Groups["name"].Value;
+				string pragmaValue = pragmaMatch.Groups["value"].Value;
+				if (pragmaName.Equals("preserveBlankLines", StringComparison.CurrentCultureIgnoreCase))
+				{
+					if (!bool.TryParse(pragmaValue, out preserveBlankLines))
+					{
+						WriteToStream("# -> WARNING: Couldn't parse '" + pragmaValue + "' as boolean", writer);
+					}
+				}
+				else if (pragmaName.Equals("ignoreExistingDurations", StringComparison.CurrentCultureIgnoreCase))
+				{
+					if (!bool.TryParse(pragmaValue, out ignoreExistingDurations))
+					{
+						WriteToStream("# -> WARNING: Couldn't parse '" + pragmaValue + "' as boolean", writer);
+					}
+				}
+				else if (pragmaName.Equals("durationFormat", StringComparison.CurrentCultureIgnoreCase))
+				{
+					if (!Enum.TryParse(pragmaValue, ignoreCase: true, out durationFormat))
+					{
+						WriteToStream("# -> WARNING: Couldn't parse '" + pragmaValue + "' as duration format", writer);
+					}
+				}
+				else
+				{
+					WriteToStream("# -> WARNING: Unknown pragma '" + pragmaName + "'", writer);
+				}
+			}
+			else
+			{
+				WriteToStream("# -> WARNING: Invalid pragma format", writer);
+			}
 			WriteToStream(line, writer);
 			return true;
 		}
 
-		private bool ProcessDate(string line, StreamWriter writer)
+		private bool ProcessExclusion(string line, bool lastLineWasBlank, StreamWriter writer)
 		{
-			DateTime dateTime;
-
-			if (!DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out dateTime))
-				return false;
-
-			//WriteDebug("\t" + line + " parsed as date " + date.ToString());
-
-			if (FinalizeDay(writer))
+			if (!line.StartsWith("#-- "))
 			{
-				//WriteDebug("\tPrevious day was ended, so writing empty line.");
+				return false;
+			}
+			string exclusionText = line.Substring(4);
+			if (!dayInEffect || !currentDay.HasValue || !TimeParser.Matches(exclusionText))
+			{
+				WriteToStream(line, writer);
+				WriteToStream("# -> WARNING: Invalid exclusion line", writer);
+				return false;
+			}
+			TimeSpan effectiveStart = GetEffectiveStart();
+			ParsedEntry exclusion = TimeParser.Parse(exclusionText, currentDay.Value, effectiveStart, ignoreExistingDurations);
+			pendingEntries.Add(new Tuple<string, DateTime, DateTime?>(line, exclusion.Start, exclusion.End));
+			return true;
+		}
+
+		private bool ProcessComment(string line, bool lastLineWasBlank, StreamWriter writer)
+		{
+			if (!line.StartsWith("#"))
+			{
+				return false;
+			}
+			if (pendingEntries.Count > 0)
+			{
+				pendingEntries.Add(line);
+			}
+			else
+			{
+				WriteToStream(line, writer);
+			}
+			return true;
+		}
+
+		private bool ProcessDate(string line, bool lastLineWasBlank, StreamWriter writer)
+		{
+			if (!DateTime.TryParseExact(line, acceptableDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out DateTime dateTime))
+			{
+				return false;
+			}
+			if (FinalizeDay(lastLineWasBlank, writer))
+			{
+				lastLineWasBlank = false;
+			}
+			if (!lastLineWasBlank)
+			{
 				WriteToStream("", writer);
 			}
-
 			dayInEffect = true;
 			currentDay = new Date(dateTime);
 			daySpans = new List<TimeSpan>();
 			lastStart = null;
+			lastEnd = null;
 			if (weekSpans == null)
+			{
 				weekSpans = new List<TimeSpan>();
-			var dateText = dateTime.ToString(dateTimeFormat);
+			}
+			string dateText = dateTime.ToString(dateTimeFormat);
 			WriteToStream(dateText, writer);
-			var equals = new string(new object[dateText.Length].Select(o => '=').ToArray());
-			WriteToStream(@equals, writer);
+			string equals = new string(new object[dateText.Length].Select((object o) => '=').ToArray());
+			WriteToStream(equals, writer);
 			return true;
 		}
 
-		private bool ProcessDateUnderline(string line, StreamWriter writer)
+		private bool ProcessDateUnderline(string line, bool lastLineWasBlank, StreamWriter writer)
 		{
 			if (!dayInEffect)
-				return false;
-
-			var trimmed = line.Trim();
-
-			if (trimmed.Length > 0 && trimmed.Trim(new[] { '=' }).Length == 0)
 			{
-				//WriteDebug("\tIgnoring existing date underline.");
+				return false;
+			}
+			string trimmed = line.Trim();
+			if (trimmed.Length > 0 && trimmed.Trim('=').Length == 0)
+			{
 				return true;
 			}
-
 			return false;
 		}
 
-		private bool ProcessTime(string line, StreamWriter writer)
+		private TimeSpan GetEffectiveStart()
+		{
+			if (lastStart.HasValue)
+			{
+				return lastStart.Value;
+			}
+			if (earliestStart.HasValue)
+			{
+				TimeSpan midnight = currentDay.Value.LocalDate.TimeOfDay;
+				TimeSpan earliestStartTime = currentDay.Value.LocalDate.AddHours(earliestStart.Value).TimeOfDay;
+				return midnight.Add(earliestStartTime);
+			}
+			return currentDay.Value.LocalDate.TimeOfDay;
+		}
+
+		private bool ProcessTime(string line, bool lastLineWasBlank, StreamWriter writer)
 		{
 			if (!dayInEffect || !currentDay.HasValue || !TimeParser.Matches(line))
+			{
 				return false;
-
-			TimeSpan effectiveStart;
-
-			if (lastStart.HasValue)
-				effectiveStart = lastStart.Value;
+			}
+			TimeSpan effectiveStart = GetEffectiveStart();
+			ParsedEntry parsed = TimeParser.Parse(line, currentDay.Value, effectiveStart, ignoreExistingDurations);
+			if (pendingEntries.Count > 0 && FinalizePendingEntries(parsed.Start, writer, out string lastFinalizedLine))
+			{
+				lastLineWasBlank = string.IsNullOrEmpty(lastFinalizedLine);
+			}
+			if (pendingEntries.Count > 0 || (parsed.End.HasValue && !parsed.Duration.HasValue))
+			{
+				pendingEntries.Add(parsed);
+			}
 			else
 			{
-				TimeSpan defaultStart;
-				if (earliestStart.HasValue)
+				pendingEntries.Add(parsed);
+				if (FinalizePendingEntries(null, writer, out string lastFinalizedLine2))
 				{
-					var midnight = currentDay.Value.LocalDate.TimeOfDay;
-					var earliestStartTime = currentDay.Value.LocalDate.AddHours(earliestStart.Value).TimeOfDay;
-					defaultStart = midnight.Add(earliestStartTime);
+					lastLineWasBlank = string.IsNullOrEmpty(lastFinalizedLine2);
 				}
-				else
-					defaultStart = currentDay.Value.LocalDate.TimeOfDay;
-
-				effectiveStart = defaultStart;
 			}
-
-			var parsed = TimeParser.Parse(line, currentDay.Value, effectiveStart);
-
-			//WriteDebug("\tWriting time as \"" + parsed.ToString(true) + "\".");
-			WriteToStream(parsed.ToString(true), writer);
-
 			lastStart = parsed.Start.TimeOfDay;
-
 			if (parsed.End.HasValue)
 			{
-				var duration = parsed.End.Value - parsed.Start;
-				daySpans.Add(duration);
-				weekSpans.Add(duration);
+				lastEnd = parsed.End.Value.TimeOfDay;
 			}
-
 			return true;
 		}
 
-		private bool ProcessDayTotal(string line, StreamWriter writer)
+		private bool ProcessDayTotal(string line, bool lastLineWasBlank, StreamWriter writer)
 		{
 			if (!dayInEffect || !line.StartsWith("Day: "))
+			{
 				return false;
-
+			}
+			if (pendingEntries.Count > 0 && FinalizePendingEntries(null, writer, out string lastFinalizedLine))
+			{
+				lastLineWasBlank = string.IsNullOrEmpty(lastFinalizedLine);
+			}
+			if (FinalizeDay(lastLineWasBlank, writer))
+			{
+				lastLineWasBlank = false;
+			}
 			dayInEffect = false;
 			return true;
 		}
 
-		private bool ProcessWeekTotal(string line, StreamWriter writer)
+		private bool ProcessWeekTotal(string line, bool lastLineWasBlank, StreamWriter writer)
 		{
 			if (!line.StartsWith("Week: "))
+			{
 				return false;
-
+			}
+			if (pendingEntries.Count > 0 && FinalizePendingEntries(null, writer, out string lastFinalizedLine))
+			{
+				lastLineWasBlank = string.IsNullOrEmpty(lastFinalizedLine);
+			}
 			dayInEffect = false;
 			return true;
 		}
 
 		public void WriteRecoveredData(Stream outputStream, string currentLine, Stream inputStream)
 		{
-			var reader = new StreamReader(inputStream);
-			var writer = new StreamWriter(outputStream);
-
-			var line = currentLine;
-
+			StreamReader reader = new StreamReader(inputStream);
+			StreamWriter writer = new StreamWriter(outputStream);
+			string line = currentLine;
 			do
 			{
 				writer.WriteLine(line);
-			} while ((line = reader.ReadLine()) != null);
+			}
+			while ((line = reader.ReadLine()) != null);
 		}
 	}
 }

@@ -9,7 +9,11 @@ namespace TimeTxt.Core
 {
 	public static class TimeParser
 	{
-		private static readonly Regex timeRegex = new Regex(@"^(?:\*?\(\d{1,2}\:\d{2}\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:,(?<notes>.*))?)?)|(?:,(?<notes>.*)))?)\s*$", RegexOptions.Compiled);
+		private static readonly Regex timeRegex = new Regex(@"^(?:\*?\((?<duration>\d{1,2}(?:\:|\.)\d{2})\)\s*)?(?:(?<start>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:(?:,(?:\s*(?<end>\d{1,2}(?:\:\d{2})?(?:AM|PM|A|P|am|pm|a|p)?)(?:,(?<notes>.*))?)?)|(?:,(?<notes>.*)))?)\s*$", RegexOptions.Compiled);
+
+		private static readonly Regex timespanDurationRegex = new Regex("^(?<totalHours>\\d{1,2})\\:(?<minutes>\\d{2})$", RegexOptions.Compiled);
+
+		private static readonly Regex decimalDurationRegex = new Regex("^(?<wholeHours>\\d{1,2})\\.(?<minutesFraction>\\d{2})$", RegexOptions.Compiled);
 
 		private static readonly string[] allowedTimeFormats = GetAllowedTimeFormats().ToArray();
 
@@ -31,14 +35,34 @@ namespace TimeTxt.Core
 			return timeRegex.IsMatch(input);
 		}
 
-		public static ParsedEntry Parse(string input, Date day, TimeSpan timeFloor)
+		private static TimeSpan ParseDuration(string text)
+		{
+			if (timespanDurationRegex.IsMatch(text))
+			{
+				return TimeSpan.Parse(text);
+			}
+			if (decimalDurationRegex.IsMatch(text))
+			{
+				Match decimalDurationMatch = decimalDurationRegex.Match(text);
+				int wholeHours = int.Parse(decimalDurationMatch.Groups["wholeHours"].Value);
+				int minutesFraction = int.Parse(decimalDurationMatch.Groups["minutesFraction"].Value);
+				return new TimeSpan(wholeHours, (int)Math.Round((double)minutesFraction * 60.0), 0);
+			}
+			throw new FormatException($"Invalid duration '{text}'.");
+		}
+
+		public static ParsedEntry Parse(string input, Date day, TimeSpan timeFloor, bool ignoreDuration = false)
 		{
 			var match = timeRegex.Match(input);
-
 			if (!match.Success)
 				return null;
 
 			var result = new ParsedEntry();
+
+			var durationText = match.Groups["duration"].Value;
+
+			if (!ignoreDuration && !string.IsNullOrEmpty(durationText))
+				result.Duration = ParseDuration(durationText);
 
 			var startText = match.Groups["start"].Value;
 

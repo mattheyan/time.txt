@@ -105,7 +105,8 @@ namespace TimeTxt.Exe
 				}
 				catch
 				{
-					EventLog.WriteEntry("time.txt", e.Message, EventLogEntryType.Error);
+					// TODO: Write to the event log?
+					//EventLog.WriteEntry("time.txt", e.Message, EventLogEntryType.Error);
 				}
 
 				throw;

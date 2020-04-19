@@ -2,7 +2,6 @@
 .pack
 *.DotSettings.user
 *.csproj.user
-*.csproj.bak
 bin/
 obj/
 Source/TimeTxt.PowerShell/
@@ -10,3 +9,4 @@ Source/TimeTxt.PowerShell/
 .vs/
 packages/
 *.bak
+.idea/

@@ -159,51 +159,38 @@ namespace TimeTxt.Exe
 				{
 					if (args.FullPath.Equals(file, StringComparison.InvariantCultureIgnoreCase))
 					{
-						if (!lastUpdatedTime.HasValue)
+						if (!lastUpdatedTime.HasValue || File.GetLastWriteTime(file) > lastUpdatedTime)
 						{
-							goto IL_007b;
-						}
-						DateTime updatedTime;
-						DateTime lastWriteTime = File.GetLastWriteTime(file);
-						DateTime? t = lastUpdatedTime;
-						if (lastWriteTime > t)
-						{
-							goto IL_007b;
+							int num = 0;
+							while (num < 3)
+							{
+								if (num > 0)
+								{
+									Thread.Sleep(5000);
+								}
+								try
+								{
+									num++;
+									DateTime updatedTime;
+									if (TryUpdateFile(file, out updatedTime))
+										lastUpdatedTime = updatedTime;
+									return;
+								}
+								catch (IOException ex)
+								{
+									if (num >= 3)
+									{
+										throw;
+									}
+									if (!(ex.Message == $"The process cannot access the file '{args.FullPath}' because it is being used by another process."))
+									{
+										throw;
+									}
+									Services.DefaultLogger.WriteLine(ex.Message);
+								}
+							}
 						}
 					}
-					goto end_IL_0017;
-
-					IL_007b:
-					int num = 0;
-					while (num < 3)
-					{
-						if (num > 0)
-						{
-							Thread.Sleep(5000);
-						}
-						try
-						{
-							num++;
-							if (TryUpdateFile(file, out DateTime updatedTime))
-							{
-								lastUpdatedTime = updatedTime;
-							}
-							return;
-						}
-						catch (IOException ex)
-						{
-							if (num >= 3)
-							{
-								throw;
-							}
-							if (!(ex.Message == $"The process cannot access the file '{args.FullPath}' because it is being used by another process."))
-							{
-								throw;
-							}
-							Services.DefaultLogger.WriteLine(ex.Message);
-						}
-					}
-					end_IL_0017:;
 				}
 			};
 

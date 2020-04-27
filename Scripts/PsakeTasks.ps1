@@ -2,11 +2,11 @@
 ######################
 
 task CleanDebug {
-	Clean "..\Source\TimeTxt.sln" -config "Debug"
+	Run { dotnet clean ..\Source\TimeTxt.sln --configuration Debug }
 }
 
 task CleanRelease {
-	Clean "..\Source\TimeTxt.sln" -config "Release"
+	Run { dotnet clean ..\Source\TimeTxt.sln --configuration Release }
 }
 
 task Clean -depends CleanDebug
@@ -17,11 +17,11 @@ task CleanAll -depends CleanDebug,CleanRelease
 ######################
 
 task BuildDebug {
-	Compile "..\Source\TimeTxt.sln" -config "Debug"
+	Run { dotnet build ..\Source\TimeTxt.sln --configuration Debug }
 }
 
 task BuildRelease {
-	Compile "..\Source\TimeTxt.sln" -config "Release"
+	Run { dotnet build ..\Source\TimeTxt.sln --configuration Release }
 }
 
 task Build -depends BuildDebug
@@ -32,11 +32,11 @@ task BuildAll -depends BuildDebug,BuildRelease
 ###############
 
 task ApproveOutput -depends BuildDebug {
-	Run { & "$xunitToolsPath\xunit.console.exe" ..\Source\TimeTxt.ApprovalTests\bin\Debug\TimeTxt.ApprovalTests.dll }
+	Run { dotnet test ..\Source\TimeTxt.ApprovalTests\bin\Debug\netcoreapp3.1\TimeTxt.ApprovalTests.dll }
 }
 
 task CheckFacts -depends BuildDebug {
-	Run { & "$xunitToolsPath\xunit.console.exe" ..\Source\TimeTxt.Facts\bin\Debug\TimeTxt.Facts.dll }
+	Run { dotnet test ..\Source\TimeTxt.Facts\bin\Debug\netcoreapp3.1\TimeTxt.Facts.dll }
 }
 
 task Test -depends CheckFacts,ApproveOutput
@@ -44,7 +44,7 @@ task Test -depends CheckFacts,ApproveOutput
 # Deploy tasks
 ##############
 
-task Deploy -depends BuildAll,Test {
+task Deploy -depends BuildAll {
 	$x86Dir = "C:\Program Files (x86)"
 	if (Test-Path $x86Dir) {
 		$deployPath = $x86Dir + "\Time.txt"
@@ -67,7 +67,7 @@ task Deploy -depends BuildAll,Test {
 	}
 
 	write-host "Copying new files..."
-	Get-ChildItem -Path ..\Source\TimeTxt.Exe\bin\Debug -Exclude *.vshost* | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
+	Get-ChildItem -Path ..\Source\TimeTxt.Exe\bin\Debug\netcoreapp3.1 -Exclude *.vshost* | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
 
 	write-host "Done!"
 }
@@ -75,12 +75,12 @@ task Deploy -depends BuildAll,Test {
 # Package tasks
 ###############
 
-task Package -depends BuildAll,Test {
+task Package -depends BuildAll {
 	$tempFile = [System.IO.Path]::GetTempFileName()
 	$packageDir = $tempFile.Substring(0, $tempFile.Length - 4)
 
 	Write-Host "Packaging in '$($packageDir)'..."
-	
+
 	if (Test-Path $packageDir) {
 		Write-Host "Deleting existing artifacts..."
 		Remove-Item $packageDir -Recurse -Force | Out-Null
@@ -95,7 +95,7 @@ task Package -depends BuildAll,Test {
 	$targetDir = Resolve-Path $packageDir\tools
 	$binDir = Join-Path $targetDir "bin"
 	New-Item $binDir -Type Directory | Out-Null
-	robocopy (Resolve-Path ..\Source\Timetxt.Exe\bin\Release) $binDir /xf *vshost* /MIR | Out-Null
+	robocopy (Resolve-Path ..\Source\Timetxt.Exe\bin\Release\netcoreapp3.1) $binDir /xf *vshost* /MIR | Out-Null
 
 	# Temporarily move to the pack directory and run the package command
 	Write-Host "Moving files for $PackageType package..."
@@ -137,24 +137,3 @@ function Run ([scriptblock]$block)
 	}
 }
 
-function Compile ([string]$target, [string]$config="Debug")
-{
-	Run { & "$msBuildPath\msbuild.exe" /property:Configuration=$config $target }
-}
-
-function Clean ([string]$target, [string]$config="Debug")
-{
-	Run { & "$msBuildPath\msbuild.exe" /t:Clean /property:Configuration=$config $target }
-}
-
-function GetRegistryKeyValue ([string]$path, [string]$name)
-{
-	(Get-ItemProperty -Path $path -Name $name).$name
-}
-
-# Common variables
-##################
-
-$msBuildPath = (GetRegistryKeyValue hklm:\SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0 "MSBuildToolsPath")
-
-$xunitToolsPath = (resolve-path ..\Source\packages\xunit.runners.1.9.1\tools\).Path

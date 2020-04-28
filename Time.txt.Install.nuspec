@@ -3,13 +3,22 @@
   <metadata>
     <id>time.txt.install</id>
     <title>Time.txt</title>
-    <version>2.2.2.20161006</version>
+    <version>2.3.3</version>
     <authors>Bryan Matthews</authors>
     <owners>Bryan Matthews</owners>
     <projectUrl>https://github.com/mattheyan/time.txt</projectUrl>
     <summary>A formatted text file for tracking time.</summary>
     <description>A formatted text file for tracking time. Inspired by todo.txt.</description>
     <releaseNotes>
+
+Time.txt 2.3.3, 2020-04-27
+==========================
+- Minor backup and error handling changes (c1a3151)
+- Allow selecting any text file (12ff5d8)
+- Add timestamp to log file and fix locking issue (3cdf74f)
+- Recover lost 2.3 changes (d181713)
+  - Options that can be set in txt file (preserveBlankLines, ignoreExistingDurations, durationFormat)
+  - Exclusion lines (start with "#--") which are excluded, or deducted, from pending entries
 
 Time.txt 2.2.2.20161006, 2016-10-06
 ===================================

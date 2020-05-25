@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommonServiceLocator" Version="2.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TimeTxt.Core\TimeTxt.Core.csproj" />
   </ItemGroup>
 

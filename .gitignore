@@ -11,4 +11,4 @@ packages/
 *.bak
 .idea/
 Thumbs.db
-
+__MACOSX/

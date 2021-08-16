@@ -8,7 +8,6 @@ Source/TimeTxt.PowerShell/
 Source/TimeTxt.JS/
 *.nupkg
 .vs/
-packages/
 *.bak
 .idea/
 Thumbs.db

@@ -5,6 +5,7 @@
 bin/
 obj/
 Source/TimeTxt.PowerShell/
+Source/TimeTxt.JS/
 *.nupkg
 .vs/
 packages/
@@ -12,3 +13,4 @@ packages/
 .idea/
 Thumbs.db
 __MACOSX/
+todo.txt

@@ -130,6 +130,9 @@ Development
 
 Solution and source can be found in the 'Source' directory.
 
+.NET Core 3.1 SDK must be installed
+https://dotnet.microsoft.com/download/visual-studio-sdks
+
 There are a few .bat files available to perform common tasks.
 
 A couple of example commands via PowerShell:

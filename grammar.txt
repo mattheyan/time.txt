@@ -1,0 +1,8 @@
+#! foo=bar                         <-- Pragma
+Sunday, August 15, 2021            <-- Date
+=======================            <-- Date Underline
+(0:20) 9a, 9:20a, test 123         <-- Time
+#-- (0:04) 9:10a, 9:14a, excluded  <-- Exclusion
+# Some text                        <-- Comment
+Day: 0:16                          <-- Day Total
+Week: 0:16                         <-- Week Total

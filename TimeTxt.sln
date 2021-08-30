@@ -21,8 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{8185
 		runtests.cmd = runtests.cmd
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Testing", "Testing", "{635D8DC6-46F1-4C50-B24B-4B04ECC9CDE8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{134BA8F2-9D6E-4090-81FA-8FE07D6F98B7}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
@@ -66,10 +64,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{3A0957B2-8495-4A7E-8844-95F535ABD72B} = {635D8DC6-46F1-4C50-B24B-4B04ECC9CDE8}
-		{1D8546C1-5917-4BE0-8B75-041B539703A9} = {635D8DC6-46F1-4C50-B24B-4B04ECC9CDE8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D74839C3-4D66-4B0E-AC4A-E01D3A388D62}

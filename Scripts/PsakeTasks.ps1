@@ -70,7 +70,7 @@ task Deploy -depends BuildAll {
 	}
 
 	write-host "Copying new files..."
-	Get-ChildItem -Path $solutionDir\TimeTxt.Exe\bin\Debug\netcoreapp3.1 -Exclude *.vshost* | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
+	Get-ChildItem -Path $solutionDir\Source\TimeTxt.Exe\bin\Debug\netcoreapp3.1 -Exclude *.vshost* | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
 
 	write-host "Done!"
 }
@@ -98,7 +98,7 @@ task Package -depends BuildAll {
 	$targetDir = Resolve-Path $packageDir\tools
 	$binDir = Join-Path $targetDir "bin"
 	New-Item $binDir -Type Directory | Out-Null
-	robocopy (Resolve-Path ..\Source\Timetxt.Exe\bin\Release\netcoreapp3.1) $binDir /xf *vshost* /MIR | Out-Null
+	robocopy (Resolve-Path $solutionDir\Source\Timetxt.Exe\bin\Release\netcoreapp3.1) $binDir /xf *vshost* /MIR | Out-Null
 
 	# Temporarily move to the pack directory and run the package command
 	Write-Host "Moving files for $PackageType package..."

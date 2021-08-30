@@ -1,12 +1,15 @@
 # Clean solution tasks
 ######################
 
+$here = Split-Path $MyInvocation.MyCommand.Path -Parent
+$solutionDir = Split-Path $here -Parent
+
 task CleanDebug {
-	Run { dotnet clean ..\Source\TimeTxt.sln --configuration Debug }
+	Run { dotnet clean $solutionDir\Source\TimeTxt.sln --configuration Debug }
 }
 
 task CleanRelease {
-	Run { dotnet clean ..\Source\TimeTxt.sln --configuration Release }
+	Run { dotnet clean $solutionDir\Source\TimeTxt.sln --configuration Release }
 }
 
 task Clean -depends CleanDebug
@@ -17,11 +20,11 @@ task CleanAll -depends CleanDebug,CleanRelease
 ######################
 
 task BuildDebug {
-	Run { dotnet build ..\Source\TimeTxt.sln --configuration Debug }
+	Run { dotnet build $solutionDir\Source\TimeTxt.sln --configuration Debug }
 }
 
 task BuildRelease {
-	Run { dotnet build ..\Source\TimeTxt.sln --configuration Release }
+	Run { dotnet build $solutionDir\Source\TimeTxt.sln --configuration Release }
 }
 
 task Build -depends BuildDebug
@@ -32,11 +35,11 @@ task BuildAll -depends BuildDebug,BuildRelease
 ###############
 
 task ApproveOutput -depends BuildDebug {
-	Run { dotnet test ..\Source\TimeTxt.ApprovalTests\bin\Debug\netcoreapp3.1\TimeTxt.ApprovalTests.dll }
+	Run { dotnet test $solutionDir\Source\TimeTxt.ApprovalTests\bin\Debug\netcoreapp3.1\TimeTxt.ApprovalTests.dll }
 }
 
 task CheckFacts -depends BuildDebug {
-	Run { dotnet test ..\Source\TimeTxt.Facts\bin\Debug\netcoreapp3.1\TimeTxt.Facts.dll }
+	Run { dotnet test $solutionDir\Source\TimeTxt.Facts\bin\Debug\netcoreapp3.1\TimeTxt.Facts.dll }
 }
 
 task Test -depends CheckFacts,ApproveOutput
@@ -67,7 +70,7 @@ task Deploy -depends BuildAll {
 	}
 
 	write-host "Copying new files..."
-	Get-ChildItem -Path ..\Source\TimeTxt.Exe\bin\Debug\netcoreapp3.1 -Exclude *.vshost* | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
+	Get-ChildItem -Path $solutionDir\TimeTxt.Exe\bin\Debug\netcoreapp3.1 -Exclude *.vshost* | foreach { Copy-Item -Path $_.FullName -Destination $deployPath }
 
 	write-host "Done!"
 }
@@ -99,11 +102,11 @@ task Package -depends BuildAll {
 
 	# Temporarily move to the pack directory and run the package command
 	Write-Host "Moving files for $PackageType package..."
-	Copy-Item ..\Time.txt.Install.nuspec $packageDir | Out-Null
+	Copy-Item $solutionDir\Time.txt.Install.nuspec $packageDir | Out-Null
 	Write-Host "Copying installer script..."
-	Copy-Item ..\chocolateyInstall.ps1 $packageDir\tools\chocolateyInstall.ps1 | Out-Null
+	Copy-Item $solutionDir\chocolateyInstall.ps1 $packageDir\tools\chocolateyInstall.ps1 | Out-Null
 	Write-Host "Copying uninstaller script..."
-	Copy-Item ..\chocolateyUninstall.ps1 $packageDir\tools\chocolateyUninstall.ps1 | Out-Null
+	Copy-Item $solutionDir\chocolateyUninstall.ps1 $packageDir\tools\chocolateyUninstall.ps1 | Out-Null
 
 	# Take from 'Test-Admin' from Boxstarter...
 	$identity  = [System.Security.Principal.WindowsIdentity]::GetCurrent()
@@ -122,7 +125,7 @@ task Package -depends BuildAll {
 	}
 
 	# Copy the resulting package into the root directory
-	Move-Item $packageDir\*.nupkg ..\ -Force | Out-Null
+	Move-Item $packageDir\*.nupkg $solutionDir -Force | Out-Null
 }
 
 # Common helper functions

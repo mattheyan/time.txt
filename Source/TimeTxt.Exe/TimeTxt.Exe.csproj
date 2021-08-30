@@ -4,8 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
-    <Version>2.3.3</Version>
-    <Copyright>Copyright © 2020, Bryan Matthews</Copyright>
+    <Version>2.5.0</Version>
+    <Copyright>Copyright © 2021, Bryan Matthews</Copyright>
     <Company>None</Company>
     <Authors>Bryan Matthews</Authors>
     <AssemblyName>TimeTxt</AssemblyName>

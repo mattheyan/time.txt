@@ -3,13 +3,25 @@
   <metadata>
     <id>time.txt.install</id>
     <title>Time.txt</title>
-    <version>2.4.0</version>
+    <version>2.5.0</version>
     <authors>Bryan Matthews</authors>
     <owners>Bryan Matthews</owners>
     <projectUrl>https://github.com/mattheyan/time.txt</projectUrl>
     <summary>A formatted text file for tracking time.</summary>
     <description>A formatted text file for tracking time. Inspired by todo.txt.</description>
     <releaseNotes>
+
+Time.txt 2.5.0, 2021-08-29
+==========================
+- Fix invalid format error due to "hh:mm" when throwing "travel back in time" exception (use escape character, i.e. "hh\:mm")
+- Fix bug that resulted in always adding 12 hours to avoid "travel back in time", even when doing so would still result in "traveling back in time"
+- Don't attempt to add 12 hours to avoid "travel back in time" if the input specified AM/PM (see: AnErrorOccursIfItIsBeforeTheLastStartTime)
+- Error handling fixes (for "graceful recovery" mode):
+  - Write failing line with a leading comment '#' character
+  - Finalize pending entries before writing the failing line and exception message
+  - Write "ERROR" line in both exception and non-matching cases
+  - Don't exit when a line does not match
+- Avoid excessively reducing duration when following time blocks are nested
 
 Time.txt 2.4.0, 2021-07-12
 ==========================

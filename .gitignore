@@ -13,3 +13,7 @@ Source/TimeTxt.JS/
 Thumbs.db
 __MACOSX/
 todo.txt
+*.received.txt
+Source/TimeTxt.ApprovalTests/time.txt
+Source/TimeTxt.ApprovalTests/StreamFact.DebugScenarios.TimeTxtFileIsUpdated.approved.txt
+

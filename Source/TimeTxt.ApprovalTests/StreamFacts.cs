@@ -483,7 +483,40 @@ namespace TimeTxt.ApprovalTests
 			}
 		}
 
-		protected string Update(string timesheet)
+		public class DebugScenarios : StreamFact
+		{
+			private string PopDirectories(string path, params string[] dirs)
+			{
+				if (dirs.Length == 0)
+					return path;
+
+				var leafPath = Path.DirectorySeparatorChar + string.Join(Path.DirectorySeparatorChar, dirs.Select(d => d.ToLower()));
+				if (path.ToLower().EndsWith(leafPath))
+					return path.Substring(0, path.Length - leafPath.Length);
+
+				return path;
+			}
+
+			private string GetProjectPath()
+			{
+				var dir = Path.GetDirectoryName(typeof(StreamFact).Assembly.Location);
+				dir = PopDirectories(dir, "netcoreapp3.1");
+				dir = PopDirectories(dir, "bin", "Debug");
+				dir = PopDirectories(dir, "Debug");
+				return dir;
+			}
+
+			//[Fact]
+			public void TimeTxtFileIsUpdated()
+			{
+				var timeFilePath = Path.Combine(GetProjectPath(), "time.txt");
+				Assert.True(File.Exists(timeFilePath), $"File '{timeFilePath}' does not exist.");
+				var timeFileContent = File.ReadAllText(timeFilePath);
+				Approvals.Verify(Update(timeFileContent, earliestStart: null));
+			}
+		}
+
+		protected string Update(string timesheet, int? earliestStart = 7)
 		{
 			using (var inputStream = new MemoryStream())
 			{
@@ -495,8 +528,9 @@ namespace TimeTxt.ApprovalTests
 
 				var outputStream = new MemoryStream();
 
-				string currentLine;
-				new UpdateStreamProcessor(7).Update(inputStream, outputStream, false, out currentLine);
+				var processor = earliestStart.HasValue ? new UpdateStreamProcessor(earliestStart: earliestStart.Value) : new UpdateStreamProcessor();
+
+				processor.Update(inputStream, outputStream, true, out var currentLine);
 
 				outputStream.Seek(0, SeekOrigin.Begin);
 				using (var reader = new StreamReader(outputStream))

@@ -158,12 +158,14 @@ namespace TimeTxt.Core
 									lastLineWasBlank = string.IsNullOrEmpty(lastLineWritten);
 								return result;
 							}
-							catch (Exception)
+							catch (Exception e)
 							{
 								if (!gracefulRecovery)
 									throw;
 
-								WriteToStream(line, writer);
+								FinalizePendingEntries(null, writer, out lastLineWritten);
+								WriteToStream("# " + line, writer);
+								WriteToStream("# -> ERROR: " + e.Message, writer);
 								return true;
 							}
 						}))
@@ -171,9 +173,10 @@ namespace TimeTxt.Core
 							if (!gracefulRecovery)
 								throw new UpdateException(line, dayInEffect);
 
-							WriteToStream("# -> ERROR: " + line, writer);
+							FinalizePendingEntries(null, writer, out lastLineWritten);
+							WriteToStream("# " + line, writer);
+							WriteToStream("# -> ERROR: Line does not match any expected format.", writer);
 							currentLine = line;
-							return false;
 						}
 					}
 				}
@@ -400,7 +403,7 @@ namespace TimeTxt.Core
 						potentialExclusion = new Tuple<DateTime, DateTime>(exclusionLine.Item2, exclusionLine.Item3.Value);
 					}
 				}
-				if (potentialExclusion != null && potentialExclusion.Item1 >= start && potentialExclusion.Item1 < end)
+				if (potentialExclusion != null && potentialExclusion.Item1 >= start && potentialExclusion.Item1 < end && (!currentExclusionEnd.HasValue || potentialExclusion.Item1 >= currentExclusionEnd.Value))
 				{
 					if (currentExclusionStart.HasValue && currentExclusionEnd.HasValue)
 					{

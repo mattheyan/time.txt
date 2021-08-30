@@ -1,0 +1,9 @@
+Sunday, August 29, 2021
+=======================
+(8:00)  9a,     5p,     work all day
+# This will not match any expected line format
+# -> ERROR: Line does not match any expected format.
+
+Day: 8:00
+
+Week: 8:00

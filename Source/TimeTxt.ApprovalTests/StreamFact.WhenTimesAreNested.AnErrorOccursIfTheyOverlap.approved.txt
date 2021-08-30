@@ -1,0 +1,9 @@
+Sunday, August 29, 2021
+=======================
+(8:43)  9:13a,  5:56p,  catch-all
+# 9:05a, 5:52, do stuff
+# -> ERROR: Cannot travel back in time: floor is 09:13 and given time is 9:05a.
+
+Day: 8:43
+
+Week: 8:43

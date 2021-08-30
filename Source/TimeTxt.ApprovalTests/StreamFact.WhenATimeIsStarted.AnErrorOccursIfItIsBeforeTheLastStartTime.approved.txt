@@ -1,0 +1,9 @@
+Sunday, August 29, 2021
+=======================
+(0:17)  9:13a,  9:30a,  do stuff 1
+# 9:05a, 5:52, do stuff 2
+# -> ERROR: Cannot travel back in time: floor is 09:13 and given time is 9:05a.
+
+Day: 0:17
+
+Week: 0:17

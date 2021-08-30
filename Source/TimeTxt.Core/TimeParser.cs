@@ -69,19 +69,21 @@ namespace TimeTxt.Core
 			var startDateTimeText = day.AsDateTime(DateTimeKind.Local).ToString("yyyy/MM/dd", CultureInfo.InvariantCulture) + " " + startText.ToUpper();
 
 			DateTime start;
-			if (DateTime.TryParseExact(startDateTimeText, allowedTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out start))
+			if (DateTimeExtensions.TryParseExact(startDateTimeText, allowedTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out start, out var startFormat))
 			{
 				if (start.TimeOfDay.Ticks >= timeFloor.Ticks)
 					result.Start = start;
-				else
+				else if (!startFormat.EndsWith("t"))
 				{
 					var startPlus12Hours = start.AddHours(12);
 
-					if (startPlus12Hours.IsOn(day) && startPlus12Hours.Ticks >= timeFloor.Ticks)
+					if (startPlus12Hours.IsOn(day) && startPlus12Hours.TimeOfDay.Ticks >= timeFloor.Ticks)
 						result.Start = startPlus12Hours;
 					else
-						throw new InvalidOperationException(string.Format("Cannot travel back in time: floor is {0} and given time is {1}.", timeFloor.ToString("hh:mm", CultureInfo.InvariantCulture), startText));
+						throw new InvalidOperationException(string.Format("Cannot travel back in time: floor is {0} and given time is {1}.", timeFloor.ToString("hh\\:mm", CultureInfo.InvariantCulture), startText));
 				}
+				else
+					throw new InvalidOperationException(string.Format("Cannot travel back in time: floor is {0} and given time is {1}.", timeFloor.ToString("hh\\:mm", CultureInfo.InvariantCulture), startText));
 			}
 			else
 				throw new FormatException(string.Format("\"{0}\" is not a valid time.", startDateTimeText));
@@ -93,19 +95,21 @@ namespace TimeTxt.Core
 				var endDateTimeText = day.AsDateTime(DateTimeKind.Local).ToString("yyyy/MM/dd", CultureInfo.InvariantCulture) + " " + endText.ToUpper();
 
 				DateTime end;
-				if (DateTime.TryParseExact(endDateTimeText, allowedTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out end))
+				if (DateTimeExtensions.TryParseExact(endDateTimeText, allowedTimeFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out end, out var endFormat))
 				{
 					if (end.TimeOfDay.Ticks > result.Start.TimeOfDay.Ticks)
 						result.End = end;
-					else
+					else if (!endFormat.EndsWith("t"))
 					{
 						var endPlus12Hours = end.AddHours(12);
 
-						if (endPlus12Hours.IsOn(day) && endPlus12Hours.Ticks > result.Start.TimeOfDay.Ticks)
+						if (endPlus12Hours.IsOn(day) && endPlus12Hours.TimeOfDay.Ticks > result.Start.TimeOfDay.Ticks)
 							result.End = endPlus12Hours;
 						else
-							throw new InvalidOperationException(string.Format("Cannot travel back in time: floor is {0} and given time is {1}.", result.Start.ToString("hh:mm", CultureInfo.InvariantCulture), endText));
+							throw new InvalidOperationException(string.Format("Cannot travel back in time: floor is {0} and given time is {1}.", result.Start.ToString("hh\\:mm", CultureInfo.InvariantCulture), endText));
 					}
+					else
+						throw new InvalidOperationException(string.Format("Cannot travel back in time: floor is {0} and given time is {1}.", result.Start.ToString("hh\\:mm", CultureInfo.InvariantCulture), endText));
 				}
 				else
 					throw new FormatException(string.Format("\"{0}\" is not a valid time.", endDateTimeText));

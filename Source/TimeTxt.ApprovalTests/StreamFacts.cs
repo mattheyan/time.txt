@@ -1,6 +1,8 @@
 ﻿using ApprovalTests;
 using ApprovalTests.Reporters;
+using System;
 using System.IO;
+using System.Linq;
 using TimeTxt.Core;
 using Xunit;
 
@@ -98,6 +100,43 @@ namespace TimeTxt.ApprovalTests
 			}
 		}
 
+		public class WhenADateIsEnded : StreamFact
+		{
+			[Fact]
+			public void TheDayAndWeekTotalsAreUpdated()
+			{
+				Approvals.Verify(Update(@"
+
+					08/29/2021
+
+					9a, 5p, do stuff
+
+					Day: 0:00
+
+					Week: 0:00
+
+				"));
+			}
+
+			[Fact]
+			public void TheDayTotalDoesNotIncludeGaps()
+			{
+				Approvals.Verify(Update(@"
+
+					08/29/2021
+
+					2:19p, 2:25p, thing 1
+					2:25p, 2:29p, thing 2
+					2:40p, 2:43p, thing 3
+
+					Day: 0:00
+
+					Week: 0:00
+
+				"));
+			}
+		}
+
 		public class WhenATimeIsStarted : StreamFact
 		{
 			[Fact]
@@ -118,6 +157,42 @@ namespace TimeTxt.ApprovalTests
 
 					5/1/2012
 					3,
+
+				"));
+			}
+
+			[Fact]
+			public void ItIsMadePmIfBeforeTheLastStartTime()
+			{
+				Approvals.Verify(Update(@"
+
+					8/29/2021
+					9:13a, 9:30a, do stuff in the morning
+					9:05, 10, do stuff some other time
+
+				"));
+			}
+
+			[Fact]
+			public void AnErrorOccursIfItIsBeforeTheLastStartTimeAndCantBePm()
+			{
+				Approvals.Verify(Update(@"
+
+					8/29/2021
+					3:10p, 4p, do stuff 1
+					3, 5, do stuff 2
+
+				"));
+			}
+
+			[Fact]
+			public void AnErrorOccursIfItIsBeforeTheLastStartTime()
+			{
+				Approvals.Verify(Update(@"
+
+					8/29/2021
+					9:13a, 9:30a, do stuff 1
+					9:05a, 5:52, do stuff 2
 
 				"));
 			}
@@ -210,6 +285,23 @@ namespace TimeTxt.ApprovalTests
 
 					5/1/2012
 					(0:05) 3, 4:10
+
+				"));
+			}
+		}
+
+		public class WhenLineIsImproperlyFormatted : StreamFact
+		{
+			[Fact]
+			public void AnErrorOccurs()
+			{
+				Approvals.Verify(Update(@"
+
+					8/29/2021
+					9, 5, work all day
+					This will not match any expected line format
+
+					Day: 0:00
 
 				"));
 			}
@@ -313,6 +405,79 @@ namespace TimeTxt.ApprovalTests
 
 					5/1/2012
 					8:10, 9:42, do stuff
+
+				"));
+			}
+		}
+
+		public class WhenTimesAreNested : StreamFact
+		{
+			[Fact]
+			public void TheOuterTimeDurationIsReduced()
+			{
+				Approvals.Verify(Update(@"
+
+					8/29/2021
+					8a, 9a, catch-all
+					8:15a, 8:30a, do stuff
+
+				"));
+			}
+
+			[Fact]
+			public void AnErrorOccursIfTheyOverlap()
+			{
+				Approvals.Verify(Update(@"
+
+					8/29/2021
+					9:13a, 5:56, catch-all
+					9:05a, 5:52, do stuff
+
+				"));
+			}
+
+			[Fact]
+			public void MultipleTimesCanBeNested()
+			{
+				Approvals.Verify(Update(@"
+
+					8/29/2021
+					7:46a,  8:02a,  line 1
+					8:49a,  8:50a,  line 2
+					9:05a,  5:56,   line 3
+					9:05a,  9:13a,  line 4
+					9:13a,  5:52,   line 5
+					9:13a,  9:21a,  line 6
+					9:15a,  9:18a,  line 7
+					9:21a,  10a,    line 8
+					9:33a,  9:37a,  line 9
+					9:39a,  9:40a,  line 10
+					9:47a,  9:52a,  line 11
+					10a,    10:05a, line 12
+					10:03a, 10:04a, line 13
+					10:05a, 10:07a, line 14
+					10:07a, 11:11a, line 15
+					10:08a, 10:11a, line 16
+					11:11a, 11:26a, line 17
+					11:26a, 11:32a, line 18
+					11:32a, 11:37a, line 19
+					11:37a, 11:42a, line 20
+					11:42a, 11:45a, line 21
+					#-- (0:15)  11:50a, 12:05p, EXCLUDED
+					#-- (0:20)  12:05p, 12:25p, EXCLUDED
+					12:26p, 12:46p, line 22
+					12:46p, 1p,     line 23
+					1p,     1:30p,  line 24
+					1:28p,  1:29p,  line 25
+					1:29p,  1:30p,  line 26
+					1:30p,  2:23p,  line 27
+					1:47p,  1:48p,  line 28
+					1:49p,  1:50p,  line 29
+					1:50p,  1:51p,  line 30
+					2:23p,  2:24p,  line 31
+					#-- (0:10)  2:28p,  2:38p,  EXCLUDED
+					2:38p,  5:52p,  line 32
+					5:52p,  5:55p,  line 33
 
 				"));
 			}

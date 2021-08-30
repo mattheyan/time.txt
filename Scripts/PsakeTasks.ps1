@@ -5,11 +5,11 @@ $here = Split-Path $MyInvocation.MyCommand.Path -Parent
 $solutionDir = Split-Path $here -Parent
 
 task CleanDebug {
-	Run { dotnet clean $solutionDir\Source\TimeTxt.sln --configuration Debug }
+	Run { dotnet clean $solutionDir\TimeTxt.sln --configuration Debug }
 }
 
 task CleanRelease {
-	Run { dotnet clean $solutionDir\Source\TimeTxt.sln --configuration Release }
+	Run { dotnet clean $solutionDir\TimeTxt.sln --configuration Release }
 }
 
 task Clean -depends CleanDebug
@@ -20,11 +20,11 @@ task CleanAll -depends CleanDebug,CleanRelease
 ######################
 
 task BuildDebug {
-	Run { dotnet build $solutionDir\Source\TimeTxt.sln --configuration Debug }
+	Run { dotnet build $solutionDir\TimeTxt.sln --configuration Debug }
 }
 
 task BuildRelease {
-	Run { dotnet build $solutionDir\Source\TimeTxt.sln --configuration Release }
+	Run { dotnet build $solutionDir\TimeTxt.sln --configuration Release }
 }
 
 task Build -depends BuildDebug
